@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Distribuidora La Dorada</title>
+    <meta http-equiv="refresh" content="1">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        .message {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h3>Cargando aplicación...</h3>
+        <p>Redirigiendo según el rol del usuario</p>
+    </div>
+
+    <script>
+        const role = sessionStorage.getItem("userRole");
+
+        if (role === "ADMIN") {
+            window.location.href = "view/admin/dashboard.html";
+        } else if (role === "SELLER") {
+            window.location.href = "view/seller/dashboard.html";
+        } else {
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
