@@ -1,16 +1,45 @@
-/* Estilo para resaltar el campo editable activo */
+/* ===== Campos editables ===== */
 .editing-cell input {
     font-size: 1rem;
     font-weight: bold;
-    background-color: #e0ffe0; /* Suave fondo verde */
+    background-color: #e0ffe0; /* Fondo verde suave */
     border: 2px solid #28a745; /* Borde verde */
     padding: 6px 10px;
     transition: all 0.3s ease;
 }
 
-/* Cambio visual al botón cuando está en modo "Guardar" */
+/* ===== Botón en modo guardar ===== */
 .btn-save {
-    background-color: #28a745 !important; /* verde Bootstrap */
+    background-color: #28a745 !important;
     border-color: #28a745 !important;
     color: white !important;
+}
+
+/* ===== Fondo general ===== */
+body.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+/* ===== Tarjetas y tablas ===== */
+.card, .table {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* ===== Botones con efecto ===== */
+button {
+    transition: all 0.3s ease;
+}
+button:hover {
+    transform: scale(1.03);
+}
+
+/* ===== Navbar ===== */
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+/* ===== Cliente seleccionado ===== */
+tr.selected {
+    background-color: #cce5ff !important;
 }
