@@ -1,5 +1,7 @@
 $(document).ready(function () {
     let client = null;
+    let today = new Date().toISOString().split('T')[0];
+    $('#date').val(today);
 
     // Recuperar cliente desde localStorage
     const savedClient = localStorage.getItem('selectedClient');
@@ -18,9 +20,12 @@ $(document).ready(function () {
 
     // Validar que haya cliente
     if (!client || !client.id) {
-        alert('⚠️ No hay cliente seleccionado. Redirigiendo...');
-        window.location.href = 'clients.html'; // Ajusta según tu página de clientes
-        return;
+        // Si no hay cliente seleccionado, redirigir a la página de clientes
+        // Solo mostrar mensaje si no estamos en la página de clientes
+        if (!window.location.pathname.includes('clients.html')) {
+            // No redirigir automáticamente para evitar problemas de navegación
+            // Solo mostrar mensaje informativo
+        }
     }
 
     // 🔽 Cargar productos con stock > 0
@@ -136,7 +141,7 @@ $(document).ready(function () {
             url: 'http://localhost:8080/api/sales/create',
             method: 'POST',
             contentType: 'application/json',
-                 data: JSON.stringify(saleData),
+            data: JSON.stringify(saleData),
             success: function (response) {
                 alert('✅ Venta registrada correctamente');
 
@@ -224,7 +229,7 @@ $(document).ready(function () {
                                         <td>${d.productName}</td>
                                         <td>${d.productModel}</td>
                                         <td>${d.quantity}</td>
-                                        <td>$${d.unitPrince.toLocaleString('es-CO')}</td>
+                                        <td>$${d.unitPrice.toLocaleString('es-CO')}</td>
                                         <td>$${d.subtotal.toLocaleString('es-CO')}</td>
                                     </tr>
                                 `).join('')}
@@ -248,4 +253,54 @@ $(document).ready(function () {
         win.document.write(ventaHtml);
         win.document.close();
     }
+
+    // Eventos para botones
+    $('#btnRefreshDashboard').on('click', function() {
+        // Recargar datos
+        location.reload();
+    });
+
+    $('#btnCancelSale').on('click', function() {
+        // Limpiar formulario
+        $('#saleForm')[0].reset();
+        $('#date').val(today);
+        $productSelect.val('');
+        $('#quantity').val('1');
+        $('#price').val('');
+    });
+
+    // Botones de navegación
+    $('#btnNewSaleFromSalesTab').on('click', function() {
+        // Cambiar a la pestaña de dashboard
+        $('#dashboard-tab').click();
+    });
+
+    $('#btnNewClient').on('click', function() {
+        // Redirigir a la página de clientes
+        window.location.href = '../seller/clients.html';
+    });
+
+    $('#btnNewProduct').on('click', function() {
+        // Redirigir a la página de productos
+        window.location.href = '../seller/products.html';
+    });
+
+    // Botones de búsqueda
+    $('#btnSearchSales').on('click', function() {
+        // Implementar búsqueda de ventas
+        const query = $('#sales-search').val();
+        alert('Buscando ventas por: ' + query);
+    });
+
+    $('#btnSearchProducts').on('click', function() {
+        // Implementar búsqueda de productos
+        const query = $('#products-search').val();
+        alert('Buscando productos por: ' + query);
+    });
+
+    $('#btnSearchClients').on('click', function() {
+        // Implementar búsqueda de clientes
+        const query = $('#clients-search').val();
+        alert('Buscando clientes por: ' + query);
+    });
 });
