@@ -102,77 +102,85 @@ function renderClients(clients) {
 
     // Editar o guardar cliente
     function editOrSaveClient() {
-        const row = $(this).closest('tr');
-        const isEditing = row.attr('data-editing') === 'true';
+    const row = $(this).closest('tr');
+    const isEditing = row.attr('data-editing') === 'true';
 
-        if (!isEditing) {
-            // Modo edición
-            row.find('.editable').each(function () {
-                const value = $(this).text().trim();
-                const field = $(this).data('field');
+    if (!isEditing) {
+        // Modo edición: guardar valores originales y reemplazar celdas
+        row.find('.editable').each(function () {
+            const value = $(this).text().trim();
+            const field = $(this).data('field');
 
-                if (field === 'type') {
-                    $(this).html(`
-                        <select class="form-select form-select-sm">
-                            <option value="CASH" ${value.toLowerCase() === 'contado' ? 'selected' : ''}>Contado</option>
-                            <option value="CREDIT" ${value.toLowerCase() === 'crédito' || value.toLowerCase() === 'credito' ? 'selected' : ''}>Crédito</option>
-                        </select>
-                    `);
-                } else {
-                    $(this).html(`<input type="text" class="form-control form-control-sm" value="${value}">`);
-                }
-            });
-
-            row.attr('data-editing', 'true');
-            $(this).text('Guardar').removeClass('btn-warning').addClass('btn-success');
-        } else {
-            // Modo guardar
-            const id = row.data('id');
-            const name = row.find('[data-field="name"] input').val().trim();
-            const address = row.find('[data-field="address"] input').val().trim();
-            const phone = row.find('[data-field="phone"] input').val().trim();
-            const email = row.find('[data-field="email"] input').val().trim();
-            const type = row.find('[data-field="type"] select').val();
-
-            // Validación
-            if (!name || !phone) {
-                alert('Por favor, complete los campos obligatorios (Nombre y Teléfono)');
-                return;
+            if (field === 'type') {
+                $(this).html(`
+                    <select class="form-select form-select-sm">
+                        <option value="CASH" ${value === 'Contado' ? 'selected' : ''}>Contado</option>
+                        <option value="CREDIT" ${value === 'Crédito' ? 'selected' : ''}>Crédito</option>
+                    </select>
+                `);
+            } else {
+                $(this).html(`<input type="text" class="form-control form-control-sm" value="${value}">`);
             }
+        });
 
-            const updatedClient = { 
-                id, 
-                name, 
-                address, 
-                phone, 
-                email, 
-                type 
-            };
+        // ✅ Reconstruir completamente el <td> de acciones
+        const actionsTd = row.find('td').last();
+        actionsTd.html(`
+            <button class="btn btn-success btn-sm btnEdit">Guardar</button>
+            <button class="btn btn-danger btn-sm btnDelete">Delete</button>
+            <button class="btn btn-primary btn-sm btnGenerateSale">Generar venta</button>
+        `);
 
-            $.ajax({
-                url: `http://localhost:8080/api/clients/${id}`,
-                method: 'PUT',
-                contentType: 'application/json',
-                 data: JSON.stringify(updatedClient),
-                success: function () {
-                    alert("Cliente actualizado correctamente");
+        row.attr('data-editing', 'true');
 
-                    row.find('[data-field="name"]').html(name);
-                    row.find('[data-field="address"]').html(address);
-                    row.find('[data-field="phone"]').html(phone);
-                    row.find('[data-field="email"]').html(email);
-                    row.find('[data-field="type"]').html(type === 'CASH' ? 'Contado' : 'Crédito');
+    } else {
+        // Modo guardar
+        const id = row.data('id');
+        const name = row.find('[data-field="name"] input').val().trim();
+        const address = row.find('[data-field="address"] input').val().trim();
+        const phone = row.find('[data-field="phone"] input').val().trim();
+        const email = row.find('[data-field="email"] input').val().trim();
+        const type = row.find('[data-field="type"] select').val();
 
-                    row.attr('data-editing', 'false');
-                    row.find('.btn-success').text('Edit').removeClass('btn-success').addClass('btn-warning');
-                },
-                error: function (err) {
-                    console.error("Error al actualizar:", err);
-                    alert("Hubo un error al actualizar el cliente");
-                }
-            });
+        if (!name || !phone) {
+            alert('Por favor, complete los campos obligatorios (Nombre y Teléfono)');
+            return;
         }
+
+        const updatedClient = { id, name, address, phone, email, type };
+
+        $.ajax({
+            url: `http://localhost:8080/api/clients/${id}`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(updatedClient),
+            success: function () {
+                alert("Cliente actualizado correctamente");
+
+                // ✅ Restaurar celdas editables
+                row.find('[data-field="name"]').text(name);
+                row.find('[data-field="address"]').text(address);
+                row.find('[data-field="phone"]').text(phone);
+                row.find('[data-field="email"]').text(email);
+                row.find('[data-field="type"]').text(type === 'CASH' ? 'Contado' : 'Crédito');
+
+                // ✅ Reconstruir acciones con texto correcto
+                const actionsTd = row.find('td').last();
+                actionsTd.html(`
+                    <button class="btn btn-warning btn-sm btnEdit">Edit</button>
+                    <button class="btn btn-danger btn-sm btnDelete">Delete</button>
+                    <button class="btn btn-success btn-sm btnGenerateSale">Generar venta</button>
+                `);
+
+                row.attr('data-editing', 'false');
+            },
+            error: function (err) {
+                console.error("Error al actualizar:", err);
+                alert("Hubo un error al actualizar el cliente");
+            }
+        });
     }
+}
 
     // Eliminar cliente
     function deleteClient() {
@@ -210,7 +218,7 @@ function renderClients(clients) {
             return;
         }
         $.ajax({
-            url: `http://localhost:8080/api/clients/search?query=${query}`,
+            url: `http://localhost:8080/api/api/clients/search?query=${query}`,
             method: 'GET',
             success: renderClients,
             error: function(xhr, status, error) {
@@ -233,23 +241,54 @@ function renderClients(clients) {
     }
 
     // NUEVO: Generar venta usando los datos del cliente de la fila
-    function generateSaleFromClient(e) {
-        e.stopPropagation(); // no propagar clics
-        const row = $(this).closest('tr');
-        const clientData = {
-            id: row.find('td').eq(0).text().trim(),
-            name: row.find('td').eq(1).text().trim(),
-            address: row.find('td').eq(2).text().trim(),
-            phone: row.find('td').eq(3).text().trim(),
-            email: row.find('td').eq(4).text().trim(),
-            type: row.find('td').eq(5).text().trim(),
-            registrationDate: row.find('td').eq(6).text().trim()
+    // NUEVO: Generar venta usando los datos del cliente de la fila
+function generateSaleFromClient(e) {
+    e.stopPropagation();
+
+    const row = $(this).closest('tr');
+    const isEditing = row.attr('data-editing') === 'true';
+
+    // ✅ Si está en modo edición, salir de él antes de continuar
+    if (isEditing) {
+        // Reiniciar el estado de edición
+        const originalData = {
+            name: row.find('[data-field="name"]').data('original') || row.find('[data-field="name"]').text().trim(),
+            address: row.find('[data-field="address"]').data('original') || row.find('[data-field="address"]').text().trim(),
+            phone: row.find('[data-field="phone"]').data('original') || row.find('[data-field="phone"]').text().trim(),
+            email: row.find('[data-field="email"]').data('original') || row.find('[data-field="email"]').text().trim(),
+            type: row.find('[data-field="type"]').data('original') || row.find('[data-field="type"]').text().trim()
         };
 
-        // Guardar en localStorage para que salesDashboard lo lea
-        localStorage.setItem('selectedClient', JSON.stringify(clientData));
+        // Volver a mostrar los valores como texto
+        row.find('[data-field="name"]').html(originalData.name);
+        row.find('[data-field="address"]').html(originalData.address);
+        row.find('[data-field="phone"]').html(originalData.phone);
+        row.find('[data-field="email"]').html(originalData.email);
+        row.find('[data-field="type"]').html(originalData.type);
 
-        // Redirigir al dashboard de ventas (misma ruta que usabas)
-        window.location.href = "../../view/seller/salesDashboard.html";
+        // Volver el botón a "Edit"
+        const editBtn = row.find('.btnEdit');
+        editBtn.text('Edit').removeClass('btn-success').addClass('btn-warning');
+
+        // Quitar modo edición
+        row.attr('data-editing', 'false');
     }
+
+    // Obtener datos del cliente
+    const clientData = {
+        id: row.data('id'),
+        name: row.find('td').eq(1).text().trim(),
+        address: row.find('td').eq(2).text().trim(),
+        phone: row.find('td').eq(3).text().trim(),
+        email: row.find('td').eq(4).text().trim(),
+        type: row.find('td').eq(5).text().trim(),
+        registerDate: row.find('td').eq(6).text().trim()
+    };
+
+    // Guardar en localStorage
+    localStorage.setItem('selectedClient', JSON.stringify(clientData));
+
+    // Redirigir
+    window.location.href = "../../view/seller/salesDashboard.html";
+}
 });
