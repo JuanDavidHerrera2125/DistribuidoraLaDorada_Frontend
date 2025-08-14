@@ -4,321 +4,327 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Ventas - Distribuidora La Dorada</title>
+  <!-- Bootstrap 5.3.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6.4.0 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Estilos del proyecto -->
   <link rel="stylesheet" href="../../asset/css/style.css">
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="row">
-      <!-- Sidebar -->
-      <div class="col-md-2 sidebar">
-        <div class="text-center mb-4">
-          <h4 class="fw-bold"><i class="fas fa-store me-2"></i>Distribuidora</h4>
-          <p class="text-muted small">La Dorada</p>
-        </div>
-        <a href="#" class="active"><i class="fas fa-home me-2"></i> Dashboard</a>
-        <a href="../seller/sales.html"><i class="fas fa-shopping-cart me-2"></i> Ventas</a>
-        <a href="../seller/products.html"><i class="fas fa-box me-2"></i> Productos</a>
-        <a href="../seller/clients.html"><i class="fas fa-users me-2"></i> Clientes</a>
-        <a href="../seller/reports.html"><i class="fas fa-chart-line me-2"></i> Reportes</a>
-        <a href="../seller/settings.html"><i class="fas fa-cog me-2"></i> Configuración</a>
-        <a href="../../login.html"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
-      </div>
-
-      <!-- Main Content -->
-      <div class="col-md-10 main-content">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="mb-0"><i class="fas fa-chart-line me-2"></i>Panel de Ventas</h2>
-          <div>
-            <button class="btn btn-success me-2"><i class="fas fa-plus me-1"></i> Nueva Venta</button>
-            <button class="btn btn-primary" id="btnRefreshDashboard"><i class="fas fa-sync me-1"></i> Actualizar</button>
+  <!-- Contenedor principal con flex para sticky footer -->
+  <div class="d-flex flex-column min-vh-100">
+    <div class="container-fluid flex-grow-1">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+          <div class="text-center mb-4">
+            <h4 class="fw-bold"><i class="fas fa-store me-2"></i>Distribuidora</h4>
+            <p class="text-muted small">La Dorada</p>
           </div>
+          <a href="#" class="active"><i class="fas fa-home me-2"></i> Dashboard</a>
+          <a href="../seller/sales.html"><i class="fas fa-shopping-cart me-2"></i> Ventas</a>
+          <a href="../seller/products.html"><i class="fas fa-box me-2"></i> Productos</a>
+          <a href="../seller/clients.html"><i class="fas fa-users me-2"></i> Clientes</a>
+          <a href="../seller/reports.html"><i class="fas fa-chart-line me-2"></i> Reportes</a>
+          <a href="../seller/settings.html"><i class="fas fa-cog me-2"></i> Configuración</a>
+          <a href="../../login.html"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-          <div class="col-md-3">
-            <div class="stat-card sales-stat">
-              <i class="fas fa-shopping-cart"></i>
-              <h3 id="sales-count">0</h3>
-              <p>Ventas Hoy</p>
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0"><i class="fas fa-chart-line me-2"></i>Panel de Ventas</h2>
+            <div>
+              <button class="btn btn-success me-2"><i class="fas fa-plus me-1"></i> Nueva Venta</button>
+              <button class="btn btn-primary" id="btnRefreshDashboard"><i class="fas fa-sync me-1"></i> Actualizar</button>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card clients-stat">
-              <i class="fas fa-users"></i>
-              <h3 id="clients-count">0</h3>
-              <p>Clientes</p>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="stat-card products-stat">
-              <i class="fas fa-boxes"></i>
-              <h3 id="products-count">0</h3>
-              <p>Productos</p>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="stat-card revenue-stat">
-              <i class="fas fa-dollar-sign"></i>
-              <h3 id="revenue-total">$0</h3>
-              <p>Ingresos</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab">Ventas</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Productos</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">Clientes</button>
-          </li>
-        </ul>
-
-        <!-- Tab Content -->
-        <div class="tab-content" id="myTabContent">
-          <!-- Dashboard Tab -->
-          <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
-            <div class="row">
-              <!-- Sales Form -->
-              <div class="col-md-8">
-                <div class="card">
-                  <div class="card-header header-card">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Registrar Nueva Venta</h5>
-                  </div>
-                  <div class="card-body">
-                    <form id="saleForm">
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <label for="clientName" class="form-label">Cliente</label>
-                          <input type="text" id="clientName" class="form-control" readonly>
-                        </div>
-                        <div class="col-md-6">
-                          <label for="clientPhone" class="form-label">Teléfono</label>
-                          <input type="text" id="clientPhone" class="form-control" readonly>
-                        </div>
-                      </div>
-
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <label for="clientAddress" class="form-label">Dirección</label>
-                          <input type="text" id="clientAddress" class="form-control" readonly>
-                        </div>
-                        <div class="col-md-6">
-                          <label for="date" class="form-label">Fecha</label>
-                          <input type="date" id="date" class="form-control" value="">
-                        </div>
-                      </div>
-
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <label for="product" class="form-label">Producto</label>
-                          <select id="product" class="form-select">
-                            <option value="">Cargando productos...</option>
-                          </select>
-                        </div>
-                        <div class="col-md-3">
-                          <label for="quantity" class="form-label">Cantidad</label>
-                          <input type="number" id="quantity" class="form-control" min="1" value="1">
-                        </div>
-                        <div class="col-md-3">
-                          <label for="price" class="form-label">Precio Unitario</label>
-                          <input type="number" id="price" class="form-control" step="0.01" value="0">
-                        </div>
-                      </div>
-
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <label for="paymentType" class="form-label">Tipo de Pago</label>
-                          <select id="paymentType" class="form-select">
-                            <option value="CONTADO">Contado</option>
-                            <option value="CREDITO">Crédito</option>
-                            <option value="TRANSFERENCIA">Transferencia</option>
-                          </select>
-                        </div>
-                        <div class="col-md-6">
-                          <label for="paymentFrequency" class="form-label">Frecuencia de Pago</label>
-                          <select id="paymentFrequency" class="form-select">
-                            <option value="UNICO">Único</option>
-                            <option value="MENSUAL">Mensual</option>
-                            <option value="BIMESTRAL">Bimestral</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary me-2" id="btnCancelSale"><i class="fas fa-times me-1"></i> Cancelar</button>
-                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Registrar Venta</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+          <!-- Stats Cards -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="stat-card sales-stat">
+                <i class="fas fa-shopping-cart"></i>
+                <h3 id="sales-count">0</h3>
+                <p>Ventas Hoy</p>
               </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card clients-stat">
+                <i class="fas fa-users"></i>
+                <h3 id="clients-count">0</h3>
+                <p>Clientes</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card products-stat">
+                <i class="fas fa-boxes"></i>
+                <h3 id="products-count">0</h3>
+                <p>Productos</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card revenue-stat">
+                <i class="fas fa-dollar-sign"></i>
+                <h3 id="revenue-total">$0</h3>
+                <p>Ingresos</p>
+              </div>
+            </div>
+          </div>
 
-              <!-- Recent Sales -->
-              <div class="col-md-4">
-                <div class="card">
-                  <div class="card-header header-card">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Ventas Recientes</h5>
-                  </div>
-                  <div class="card-body">
-                    <div id="recent-sales-list">
-                      <p class="text-center text-muted">Cargando ventas...</p>
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab">Ventas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Productos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">Clientes</button>
+            </li>
+          </ul>
+
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+              <div class="row">
+                <!-- Sales Form -->
+                <div class="col-md-8">
+                  <div class="card">
+                    <div class="card-header header-card">
+                      <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Registrar Nueva Venta</h5>
+                    </div>
+                    <div class="card-body">
+                      <form id="saleForm">
+                        <div class="row mb-3">
+                          <div class="col-md-6">
+                            <label for="clientName" class="form-label">Cliente</label>
+                            <input type="text" id="clientName" class="form-control" readonly>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="clientPhone" class="form-label">Teléfono</label>
+                            <input type="text" id="clientPhone" class="form-control" readonly>
+                          </div>
+                        </div>
+
+                        <div class="row mb-3">
+                          <div class="col-md-6">
+                            <label for="clientAddress" class="form-label">Dirección</label>
+                            <input type="text" id="clientAddress" class="form-control" readonly>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="date" class="form-label">Fecha</label>
+                            <input type="date" id="date" class="form-control" value="">
+                          </div>
+                        </div>
+
+                        <div class="row mb-3">
+                          <div class="col-md-6">
+                            <label for="product" class="form-label">Producto</label>
+                            <select id="product" class="form-select">
+                              <option value="">Cargando productos...</option>
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label for="quantity" class="form-label">Cantidad</label>
+                            <input type="number" id="quantity" class="form-control" min="1" value="1">
+                          </div>
+                          <div class="col-md-3">
+                            <label for="price" class="form-label">Precio Unitario</label>
+                            <input type="number" id="price" class="form-control" step="0.01" value="0">
+                          </div>
+                        </div>
+
+                        <div class="row mb-3">
+                          <div class="col-md-6">
+                            <label for="paymentType" class="form-label">Tipo de Pago</label>
+                            <select id="paymentType" class="form-select">
+                              <option value="CONTADO">Contado</option>
+                              <option value="CREDITO">Crédito</option>
+                              <option value="TRANSFERENCIA">Transferencia</option>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="paymentFrequency" class="form-label">Frecuencia de Pago</label>
+                            <select id="paymentFrequency" class="form-select">
+                              <option value="UNICO">Único</option>
+                              <option value="MENSUAL">Mensual</option>
+                              <option value="BIMESTRAL">Bimestral</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                          <button type="button" class="btn btn-secondary me-2" id="btnCancelSale"><i class="fas fa-times me-1"></i> Cancelar</button>
+                          <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Registrar Venta</button>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
 
-                <div class="card mt-4">
-                  <div class="card-header header-card">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información Rápida</h5>
+                <!-- Recent Sales -->
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header header-card">
+                      <h5 class="mb-0"><i class="fas fa-history me-2"></i>Ventas Recientes</h5>
+                    </div>
+                    <div class="card-body">
+                      <div id="recent-sales-list">
+                        <p class="text-center text-muted">Cargando ventas...</p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Stock disponible
-                        <span id="stock-count" class="badge bg-primary rounded-pill">0</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Productos activos
-                        <span id="active-products" class="badge bg-primary rounded-pill">0</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Clientes registrados
-                        <span id="registered-clients" class="badge bg-primary rounded-pill">0</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Ventas del día
-                        <span id="todays-sales" class="badge bg-primary rounded-pill">0</span>
-                      </li>
-                    </ul>
+
+                  <div class="card mt-4">
+                    <div class="card-header header-card">
+                      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información Rápida</h5>
+                    </div>
+                    <div class="card-body">
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Stock disponible
+                          <span id="stock-count" class="badge bg-primary rounded-pill">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Productos activos
+                          <span id="active-products" class="badge bg-primary rounded-pill">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Clientes registrados
+                          <span id="registered-clients" class="badge bg-primary rounded-pill">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Ventas del día
+                          <span id="todays-sales" class="badge bg-primary rounded-pill">0</span>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Sales Tab -->
-          <div class="tab-pane fade" id="sales" role="tabpanel">
-            <div class="card">
-              <div class="card-header header-card">
-                <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Listado de Ventas</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                  <button class="btn btn-success" id="btnNewSaleFromSalesTab"><i class="fas fa-plus me-1"></i> Nueva Venta</button>
-                  <div class="input-group" style="width: 300px;">
-                    <input type="text" class="form-control" id="sales-search" placeholder="Buscar venta...">
-                    <button class="btn btn-outline-secondary" id="btnSearchSales"><i class="fas fa-search"></i></button>
-                  </div>
+            <!-- Sales Tab -->
+            <div class="tab-pane fade" id="sales" role="tabpanel">
+              <div class="card">
+                <div class="card-header header-card">
+                  <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Listado de Ventas</h5>
                 </div>
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Total</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody id="sales-table-body">
-                      <tr>
-                        <td colspan="9" class="text-center">Cargando ventas...</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success" id="btnNewSaleFromSalesTab"><i class="fas fa-plus me-1"></i> Nueva Venta</button>
+                    <div class="input-group" style="width: 300px;">
+                      <input type="text" class="form-control" id="sales-search" placeholder="Buscar venta...">
+                      <button class="btn btn-outline-secondary" id="btnSearchSales"><i class="fas fa-search"></i></button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Cliente</th>
+                          <th>Producto</th>
+                          <th>Cantidad</th>
+                          <th>Precio</th>
+                          <th>Total</th>
+                          <th>Fecha</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sales-table-body">
+                        <tr>
+                          <td colspan="9" class="text-center">Cargando ventas...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Products Tab -->
-          <div class="tab-pane fade" id="products" role="tabpanel">
-            <div class="card">
-              <div class="card-header header-card">
-                <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestión de Productos</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                  <button class="btn btn-success" id="btnNewProduct"><i class="fas fa-plus me-1"></i> Nuevo Producto</button>
-                  <div class="input-group" style="width: 300px;">
-                    <input type="text" class="form-control" id="products-search" placeholder="Buscar producto...">
-                    <button class="btn btn-outline-secondary" id="btnSearchProducts"><i class="fas fa-search"></i></button>
-                  </div>
+            <!-- Products Tab -->
+            <div class="tab-pane fade" id="products" role="tabpanel">
+              <div class="card">
+                <div class="card-header header-card">
+                  <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestión de Productos</h5>
                 </div>
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody id="products-table-body">
-                      <tr>
-                        <td colspan="7" class="text-center">Cargando productos...</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success" id="btnNewProduct"><i class="fas fa-plus me-1"></i> Nuevo Producto</button>
+                    <div class="input-group" style="width: 300px;">
+                      <input type="text" class="form-control" id="products-search" placeholder="Buscar producto...">
+                      <button class="btn btn-outline-secondary" id="btnSearchProducts"><i class="fas fa-search"></i></button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Nombre</th>
+                          <th>Tipo</th>
+                          <th>Precio</th>
+                          <th>Stock</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="products-table-body">
+                        <tr>
+                          <td colspan="7" class="text-center">Cargando productos...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Clients Tab -->
-          <div class="tab-pane fade" id="clients" role="tabpanel">
-            <div class="card">
-              <div class="card-header header-card">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gestión de Clientes</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                  <button class="btn btn-success" id="btnNewClient"><i class="fas fa-plus me-1"></i> Nuevo Cliente</button>
-                  <div class="input-group" style="width: 300px;">
-                    <input type="text" class="form-control" id="clients-search" placeholder="Buscar cliente...">
-                    <button class="btn btn-outline-secondary" id="btnSearchClients"><i class="fas fa-search"></i></button>
-                  </div>
+            <!-- Clients Tab -->
+            <div class="tab-pane fade" id="clients" role="tabpanel">
+              <div class="card">
+                <div class="card-header header-card">
+                  <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gestión de Clientes</h5>
                 </div>
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Dirección</th>
-                        <th>Email</th>
-                        <th>Total Compras</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody id="clients-table-body">
-                      <tr>
-                        <td colspan="8" class="text-center">Cargando clientes...</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success" id="btnNewClient"><i class="fas fa-plus me-1"></i> Nuevo Cliente</button>
+                    <div class="input-group" style="width: 300px;">
+                      <input type="text" class="form-control" id="clients-search" placeholder="Buscar cliente...">
+                      <button class="btn btn-outline-secondary" id="btnSearchClients"><i class="fas fa-search"></i></button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Nombre</th>
+                          <th>Teléfono</th>
+                          <th>Dirección</th>
+                          <th>Email</th>
+                          <th>Total Compras</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="clients-table-body">
+                        <tr>
+                          <td colspan="8" class="text-center">Cargando clientes...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -326,14 +332,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+      <div class="container text-center">
+        <p class="mb-0">© 2025 Distribuidora La Dorada. Todos los derechos reservados.</p>
+      </div>
+    </footer>
   </div>
 
-  <footer class="footer mt-5">
-    <div class="container text-center">
-      <p class="mb-0">© 2025 Distribuidora La Dorada. Todos los derechos reservados.</p>
-    </div>
-  </footer>
-
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="../../js/seller/salesDashboard.js"></script>
