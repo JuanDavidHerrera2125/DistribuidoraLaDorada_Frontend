@@ -208,4 +208,11 @@ body {
   .stat-card {
     margin-bottom: 15px;
   }
+
+  /* ===== Encabezados de todas las tablas excepto Stock ===== */
+/* Forzar encabezados de todas las tablas a negro */
+table thead th {
+    color: #000 !important; /* negro */
+}
+
 }
