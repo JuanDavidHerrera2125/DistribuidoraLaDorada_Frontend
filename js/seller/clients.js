@@ -218,7 +218,7 @@ function renderClients(clients) {
             return;
         }
         $.ajax({
-            url: `http://localhost:8080/api/api/clients/search?query=${query}`,
+            url: `http://localhost:8080/api/clients/search?query=${query}`,
             method: 'GET',
             success: renderClients,
             error: function(xhr, status, error) {
