@@ -62,6 +62,58 @@ $(document).ready(function () {
       });
   }
 
+    // --- FILTROS ---
+  $('#filterClient, #filterDate, #filterStatus').on('input change', function () {
+    filterTable();
+  });
+
+  $('#btnClearFilters').on('click', function () {
+    $('#filterClient').val('');
+    $('#filterDate').val('');
+    $('#filterStatus').val('');
+    filterTable();
+  });
+
+  function filterTable() {
+    const clientFilter = $('#filterClient').val().toLowerCase();
+    const dateFilter = $('#filterDate').val();
+    const statusFilter = $('#filterStatus').val();
+
+    $('#salesTable tbody tr').each(function () {
+      const $row = $(this);
+      const client = $row.find('td:eq(1)').text().toLowerCase();
+      const date = $row.find('td:eq(2)').text();
+      const statusText = $row.find('td:eq(4)').text().trim().toUpperCase();
+
+      let match = true;
+
+      if (clientFilter && !client.includes(clientFilter)) {
+        match = false;
+      }
+
+      if (dateFilter) {
+        const rowDate = new Date(date.split('/').reverse().join('-')).toISOString().split('T')[0];
+        if (rowDate !== dateFilter) {
+          match = false;
+        }
+      }
+
+      if (statusFilter) {
+  // Normalizar ambas cadenas a mayúsculas para que coincidan
+  if (statusFilter === "COMPLETED" && statusText.toUpperCase() !== "COMPLETADA") {
+    match = false;
+  }
+  if (statusFilter === "CANCELLED" && statusText.toUpperCase() !== "CANCELADA") {
+    match = false;
+  }
+}
+
+
+      $row.toggle(match);
+    });
+  }
+
+
   // Cargar al inicio
   loadSales();
 

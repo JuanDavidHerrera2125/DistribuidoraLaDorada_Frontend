@@ -53,6 +53,29 @@
               <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Ventas</h5>
             </div>
             <div class="card-body">
+
+              <!-- Filtros de búsqueda -->
+<div class="row mb-3">
+  <div class="col-md-3">
+    <input type="text" id="filterClient" class="form-control" placeholder="Buscar por cliente">
+  </div>
+  <div class="col-md-3">
+    <input type="date" id="filterDate" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <select id="filterStatus" class="form-select">
+      <option value="">Todos los estados</option>
+      <option value="COMPLETED">Completada</option>
+      <option value="CANCELLED">Cancelada</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <button class="btn btn-outline-secondary w-100" id="btnClearFilters">
+      <i class="fas fa-filter-circle-xmark me-1"></i> Limpiar filtros
+    </button>
+  </div>
+</div>
+
               <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
                 <table class="table table-striped table-hover" id="salesTable">
                   
