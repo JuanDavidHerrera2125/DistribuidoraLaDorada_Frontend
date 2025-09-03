@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reporte de Ventas - Distribuidora La Dorada</title>
+  <title>Reporte de Ventas - Admin</title>
   
   <!-- Bootstrap 5.3.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,53 +15,45 @@
   <link rel="stylesheet" href="../../asset/css/style.css">
 
   <style>
-    /* Forzar que los encabezados de todas las tablas sean negros */
+    /* Forzar encabezados negros en tablas */
     table thead th {
       color: black !important;
     }
   </style>
 </head>
-<body>
+<body class="bg-light">
   <!-- Contenedor principal con flex para sticky footer -->
   <div class="d-flex flex-column min-vh-100">
 
     <div class="container-fluid flex-grow-1">
       <div class="row">
         
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-          <div class="text-center mb-4">
-            <h4 class="fw-bold"><i class="fas fa-store me-2"></i>Distribuidora</h4>
-            <p class="text-muted small">La Dorada</p>
-          </div>
-          <a href="../seller/salesDashboard.html"><i class="fas fa-home me-2"></i> Dashboard</a>
-          <a href="../seller/sales.html"><i class="fas fa-shopping-cart me-2"></i> Ventas</a>
-          <a href="../seller/products.html"><i class="fas fa-box me-2"></i> Productos</a>
-          <a href="../seller/clients.html"><i class="fas fa-users me-2"></i> Clientes</a>
-          <a href="#" class="active"><i class="fas fa-chart-line me-2"></i> Reportes</a>
-          <a href="../seller/settings.html"><i class="fas fa-cog me-2"></i> Configuración</a>
-          <a href="../../login.html"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
-        </div>
+        <!-- Sidebar dinámico ADMIN -->
+        <div class="col-md-2 sidebar" id="sidebar"></div>
 
         <!-- Main Content -->
         <div class="col-md-10 main-content">
           
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0"><i class="fas fa-chart-line me-2"></i>Reporte de Ventas</h2>
-            <button class="btn btn-primary" id="btnLogout">
+            <h2 class="mb-0">
+              <i class="fas fa-chart-line me-2"></i> Reporte de Ventas
+            </h2>
+            <a href="../../login.html" class="btn btn-danger">
               <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
-            </button>
+            </a>
           </div>
 
           <!-- Tarjeta principal con tabla -->
-          <div class="card">
+          <div class="card shadow-sm">
             <div class="card-header header-card">
-              <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Ventas Registradas</h5>
+              <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i> Lista de Ventas Registradas
+              </h5>
             </div>
             <div class="card-body">
               <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
-                <table class="table table-striped table-hover" id="salesTable">
+                <table class="table table-striped table-hover align-middle" id="salesTable">
                   
                   <!-- Cabecera fija -->
                   <thead class="table-dark">
@@ -82,7 +74,7 @@
                   <tbody id="salesTableBody">
                     <tr>
                       <td colspan="9" class="text-center text-muted py-5">
-                        <div class="spinner-border text-light me-2" role="status" style="width: 20px; height: 20px;"></div>
+                        <div class="spinner-border text-primary me-2" role="status" style="width: 20px; height: 20px;"></div>
                         Cargando ventas...
                       </td>
                     </tr>
@@ -98,7 +90,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer mt-auto">
+    <footer class="footer mt-auto py-3 bg-light border-top">
       <div class="container text-center">
         <p class="mb-0">© 2025 Distribuidora La Dorada. Todos los derechos reservados.</p>
       </div>
@@ -107,8 +99,17 @@
   </div>
 
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="../../js/admin/reports.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Cargar sidebar ADMIN -->
+  <script>
+    $(function(){
+      $("#sidebar").load("../../components/sidebar-admin.html");
+    });
+  </script>
+
+  <!-- JS específico -->
+  <script src="../../js/admin/sales.js"></script>
 </body>
 </html>

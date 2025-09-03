@@ -32,26 +32,15 @@
   <div class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1">
       <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-          <div class="text-center mb-4">
-            <h4 class="fw-bold"><i class="fas fa-store me-2"></i>Distribuidora</h4>
-            <p class="text-muted small">La Dorada</p>
-          </div>
-          <a href="../seller/salesDashboard.html"><i class="fas fa-home me-2"></i> Dashboard</a>
-          <a href="../seller/sales.html"><i class="fas fa-shopping-cart me-2"></i> Ventas</a>
-          <a href="products.html"><i class="fas fa-box me-2"></i> Productos</a>
-          <a href="#" class="active"><i class="fas fa-warehouse me-2"></i> Inventario</a>
-          <a href="../seller/reports.html"><i class="fas fa-chart-line me-2"></i> Reportes</a>
-          <a href="../seller/settings.html"><i class="fas fa-cog me-2"></i> Configuración</a>
-          <a href="../../login.html"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
-        </div>
+
+        <!-- Sidebar dinámico para ADMIN -->
+        <div class="col-md-2 sidebar" id="sidebar"></div>
 
         <!-- Main Content -->
         <div class="col-md-10 main-content">
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0"><i class="fas fa-warehouse me-2"></i>Inventario de Sillas</h2>
+            <h2 class="mb-0"><i class="fas fa-warehouse me-2"></i>Inventario de Productos</h2>
             <div>
               <button class="btn btn-success me-2" id="btnRefreshStock"><i class="fas fa-sync me-1"></i> Actualizar</button>
               <button class="btn btn-primary" id="btnLogout"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</button>
@@ -69,7 +58,7 @@
                   <thead class="table-dark">
                     <tr>
                       <th class="text-start">Nombre de Producto</th>
-                      <th class="text-center">Tipo de Diseño</th>
+                      <th class="text-center">Modelo</th>
                       <th class="text-center">Precio (COP)</th>
                       <th class="text-center">Stock</th>
                     </tr>
@@ -103,60 +92,65 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="../../js/admin/stock.js"></script>
 
-  <!-- Scripts adicionales -->
- <script>
-  document.getElementById('btnRefreshStock').addEventListener('click', () => {
-    const $tbody = $('#stockTableBody');
-    $tbody.empty().append(`
-      <tr>
-        <td colspan="4" class="text-center text-muted py-5">
-          <div class="spinner-border text-light me-2" role="status" style="width: 20px; height: 20px;"></div>
-          Actualizando...
-        </td>
-      </tr>
-    `);
+  <!-- Cargar sidebar ADMIN -->
+  <script>
+    $(function(){
+      $("#sidebar").load("../../components/sidebar-admin.html");
+    });
 
-    $.get('http://localhost:8080/api/products')
-      .done((data) => {
-        $tbody.empty();
-        if (!data || data.length === 0) {
-          $tbody.append(`
+    // Refrescar stock
+    document.getElementById('btnRefreshStock').addEventListener('click', () => {
+      const $tbody = $('#stockTableBody');
+      $tbody.empty().append(`
+        <tr>
+          <td colspan="4" class="text-center text-muted py-5">
+            <div class="spinner-border text-light me-2" role="status" style="width: 20px; height: 20px;"></div>
+            Actualizando...
+          </td>
+        </tr>
+      `);
+
+      $.get('http://localhost:8080/api/products')
+        .done((data) => {
+          $tbody.empty();
+          if (!data || data.length === 0) {
+            $tbody.append(`
+              <tr>
+                <td colspan="4" class="text-center text-warning py-3">
+                  No hay productos en el inventario
+                </td>
+              </tr>
+            `);
+            return;
+          }
+          data.forEach(item => {
+            $tbody.append(`
+              <tr>
+                <td class="text-start">${item.name}</td>
+                <td class="text-center"><span class="badge bg-info">${item.model}</span></td>
+                <td class="text-center">$${item.unitPrice.toLocaleString("es-CO")}</td>
+                <td class="text-center">${item.stock ? item.stock.quantity : 0}</td>
+              </tr>
+            `);
+          });
+        })
+        .fail(() => {
+          $tbody.empty().append(`
             <tr>
-              <td colspan="4" class="text-center text-warning py-3">
-                No hay productos en el inventario
+              <td colspan="4" class="text-center text-danger py-3">
+                Error al cargar el inventario
               </td>
             </tr>
           `);
-          return;
-        }
-        data.forEach(item => {
-          $tbody.append(`
-            <tr>
-              <td class="text-start">${item.nombre}</td>
-              <td class="text-center"><span class="badge bg-info">${item.diseno}</span></td>
-              <td class="text-center">$${item.precio.toLocaleString("es-CO")}</td>
-              <td class="text-center">${item.stock}</td>
-            </tr>
-          `);
         });
-      })
-      .fail(() => {
-        $tbody.empty().append(`
-          <tr>
-            <td colspan="4" class="text-center text-danger py-3">
-              Error al cargar el inventario
-            </td>
-          </tr>
-        `);
-      });
-  });
+    });
 
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.href = "../../login.html";
-  });
-</script>
-
+    // Cerrar sesión
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "../../login.html";
+    });
+  </script>
 </body>
 </html>
