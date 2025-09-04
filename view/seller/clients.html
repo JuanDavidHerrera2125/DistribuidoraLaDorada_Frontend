@@ -4,41 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Clientes - Distribuidora La Dorada</title>
+  
   <!-- Bootstrap 5.3.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
   <!-- Font Awesome 6.4.0 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <!-- Estilos del proyecto -->
-  <link rel="stylesheet" href="../../asset/css/style.css">
+  <link rel="stylesheet" href="../../asset/css/style.css"> 
 </head>
 <body>
-  <!-- Contenedor principal con flex para sticky footer -->
+  <!-- Contenedor principal -->
   <div class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1">
       <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-          <div class="text-center mb-4">
-            <h4 class="fw-bold"><i class="fas fa-store me-2"></i>Distribuidora</h4>
-            <p class="text-muted small">La Dorada</p>
-          </div>
-          <a href="../seller/salesDashboard.html"><i class="fas fa-home me-2"></i> Dashboard</a>
-          <a href="../seller/sales.html"><i class="fas fa-shopping-cart me-2"></i> Ventas</a>
-           <!-- <a href="../seller/products.html"><i class="fas fa-box me-2"></i> Productos</a> -->
-          <a href="#" class="active"><i class="fas fa-users me-2"></i> Clientes</a>
-           <!--<a href="../seller/reports.html"><i class="fas fa-chart-line me-2"></i> Reportes</a> -->
-          <a href="../seller/settings.html"><i class="fas fa-cog me-2"></i> Configuración</a>
-          <a href="../../login.html"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+        
+        <!-- Sidebar cargado dinámicamente -->
+        <div class="col-md-2 p-0">
+          <div id="sidebar"></div>
         </div>
 
         <!-- Main Content -->
         <div class="col-md-10 main-content">
+          
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0"><i class="fas fa-users me-2"></i>Gestión de Clientes</h2>
             <div>
-              <button class="btn btn-success me-2" id="btnLoadClients"><i class="fas fa-sync me-1"></i> Actualizar</button>
-              <button class="btn btn-primary" id="btnLogout"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</button>
+              <button class="btn btn-success me-2" id="btnLoadClients">
+                <i class="fas fa-sync me-1"></i> Actualizar
+              </button>
+              <!-- 👇 quité el "Cerrar sesión" duplicado -->
             </div>
           </div>
 
@@ -49,6 +46,7 @@
             </div>
             <div class="card-body">
               <div class="row">
+                <!-- Columna izquierda -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="clienteName" class="form-label">Nombre</label>
@@ -59,6 +57,8 @@
                     <input type="text" class="form-control" id="clientePhone" placeholder="Número de teléfono">
                   </div>
                 </div>
+                
+                <!-- Columna derecha -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="clienteAddress" class="form-label">Dirección</label>
@@ -70,7 +70,9 @@
                   </div>
                 </div>
               </div>
+
               <div class="row">
+                <!-- Tipo de cliente -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="clienteType" class="form-label">Tipo de Cliente</label>
@@ -81,6 +83,7 @@
                     </select>
                   </div>
                 </div>
+                <!-- Fecha de registro -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="clienteRegisterDate" class="form-label">Fecha de Registro</label>
@@ -88,7 +91,10 @@
                   </div>
                 </div>
               </div>
-              <button class="btn btn-success" id="btnAddClient"><i class="fas fa-plus me-1"></i> Agregar Cliente</button>
+
+              <button class="btn btn-success" id="btnAddClient">
+                <i class="fas fa-plus me-1"></i> Agregar Cliente
+              </button>
             </div>
           </div>
 
@@ -99,20 +105,26 @@
             </div>
             <div class="card-body">
               <div class="row">
+                <!-- Barra de búsqueda -->
                 <div class="col-md-8">
                   <div class="input-group">
                     <input type="text" class="form-control" id="searchClient" placeholder="Buscar por nombre o teléfono...">
-                    <button class="btn btn-outline-secondary" id="btnSearchClient"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-outline-secondary" id="btnSearchClient">
+                      <i class="fas fa-search"></i>
+                    </button>
                   </div>
                 </div>
+                <!-- Botón exportar -->
                 <div class="col-md-4 text-end">
-                  <button class="btn btn-primary" id="btnExport"><i class="fas fa-file-export me-1"></i> Exportar</button>
+                  <button class="btn btn-primary" id="btnExport">
+                    <i class="fas fa-file-export me-1"></i> Exportar
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Tabla de clientes con scroll -->
+          <!-- Tabla de clientes -->
           <div class="card">
             <div class="card-header header-card">
               <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Clientes</h5>
@@ -141,7 +153,8 @@
               </div>
             </div>
           </div>
-        </div>
+
+        </div> <!-- /Main Content -->
       </div>
     </div>
 
@@ -155,7 +168,20 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Cargar sidebar dinámicamente -->
+  <script>
+    $(document).ready(function () {
+      $("#sidebar").load("../../components/sidebar-seller.html", function(response, status, xhr) {
+        if (status === "error") {
+          console.error("Error al cargar sidebar:", xhr.status, xhr.statusText);
+        }
+      });
+    });
+  </script>
+
+  <!-- Script de lógica -->
   <script src="../../js/seller/clients.js"></script>
 </body>
 </html>
