@@ -13,6 +13,13 @@
   
   <!-- Estilos del proyecto -->
   <link rel="stylesheet" href="../../asset/css/style.css">
+
+  <script src="../js/auth.js"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          checkAuth(['SELLER']); // Solo permite SELLER
+      });
+  </script>
 </head>
 <body>
   <!-- Contenedor principal con flex para sticky footer -->
@@ -30,9 +37,15 @@
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Ventas</h2>
-            <button class="btn btn-primary" id="btnLoadSales">
-              <i class="fas fa-sync-alt me-1"></i> Recargar
-            </button>
+            <div>
+              <button class="btn btn-primary me-2" id="btnLoadSales">
+                <i class="fas fa-sync-alt me-1"></i> Recargar
+              </button>
+              <!-- ✅ Agregado: Botón de cerrar sesión con logout() -->
+              <button class="btn btn-danger" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+              </button>
+            </div>
           </div>
 
           <!-- Tarjeta principal con tabla -->
@@ -113,10 +126,13 @@
 
   <!-- Cargar sidebar-seller -->
   <script>
-    $("#sidebar").load("../../components/sidebar-seller.html");
+    $(function() {
+        $("#sidebar").load("../../components/sidebar-seller.html");
+    });
   </script>
 
   <!-- JS específico de ventas -->
   <script src="../../js/seller/sales.js"></script>
+  <!-- ❌ ELIMINADO: carga duplicada de auth.js (ya está en el head) -->
 </body>
 </html>

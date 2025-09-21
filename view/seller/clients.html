@@ -13,6 +13,13 @@
   
   <!-- Estilos del proyecto -->
   <link rel="stylesheet" href="../../asset/css/style.css"> 
+
+  <script src="../js/auth.js"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          checkAuth(['SELLER']); // Solo permite SELLER
+      });
+  </script>
 </head>
 <body>
   <!-- Contenedor principal -->
@@ -35,7 +42,10 @@
               <button class="btn btn-success me-2" id="btnLoadClients">
                 <i class="fas fa-sync me-1"></i> Actualizar
               </button>
-              <!-- 👇 quité el "Cerrar sesión" duplicado -->
+              <!-- ✅ Agregado: Botón de cerrar sesión con logout() -->
+              <button class="btn btn-primary" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+              </button>
             </div>
           </div>
 
@@ -183,5 +193,6 @@
 
   <!-- Script de lógica -->
   <script src="../../js/seller/clients.js"></script>
+  <!-- ❌ ELIMINADO: carga duplicada de auth.js (ya está en el head) -->
 </body>
 </html>
