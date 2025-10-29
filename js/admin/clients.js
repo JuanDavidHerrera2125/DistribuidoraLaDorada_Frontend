@@ -1,5 +1,25 @@
 // js/admin/clients.js
 $(document).ready(function () {
+    console.log("✅ clients.js cargado");
+
+    // 🔑 Función para obtener headers de autenticación
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Debes iniciar sesión para acceder a esta página');
+            window.location.href = '../../login.html';
+            return null;
+        }
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Verificar autenticación al cargar la página
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders) return;
+
     initEvents();
     fetchClients();
 
@@ -20,10 +40,16 @@ $(document).ready(function () {
         $.ajax({
             url: 'http://localhost:8080/api/clients/all',
             method: 'GET',
+            headers: authHeaders,
             success: renderClients,
             error: function (xhr, status, error) {
                 console.error('Error al cargar clientes:', error);
-                $('#clientsTableBody').empty().append('<tr><td colspan="8" class="text-center">Error al cargar clientes</td></tr>');
+                if (xhr.status === 401) {
+                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    window.location.href = '../../login.html';
+                } else {
+                    $('#clientsTableBody').empty().append('<tr><td colspan="8" class="text-center">Error al cargar clientes</td></tr>');
+                }
             }
         });
     }
@@ -77,8 +103,9 @@ $(document).ready(function () {
         $.ajax({
             url: 'http://localhost:8080/api/clients',
             method: 'POST',
+            headers: authHeaders,
             contentType: 'application/json',
-            data: JSON.stringify(client),
+             DATA : JSON.stringify(client),
             success: function () {
                 alert('Cliente creado correctamente');
                 fetchClients();
@@ -87,7 +114,12 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 console.error('Error al crear cliente:', error);
-                alert('Error al crear cliente: ' + (xhr.responseJSON?.message || error));
+                if (xhr.status === 401) {
+                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    window.location.href = '../../login.html';
+                } else {
+                    alert('Error al crear cliente: ' + (xhr.responseJSON?.message || error));
+                }
             }
         });
     }
@@ -139,8 +171,9 @@ $(document).ready(function () {
             $.ajax({
                 url: `http://localhost:8080/api/clients/${id}`,
                 method: 'PUT',
+                headers: authHeaders,
                 contentType: 'application/json',
-                data: JSON.stringify(updatedClient),
+                DATA : JSON.stringify(updatedClient),
                 success: function () {
                     alert("Cliente actualizado correctamente");
 
@@ -160,7 +193,12 @@ $(document).ready(function () {
                 },
                 error: function (err) {
                     console.error("Error al actualizar:", err);
-                    alert("Hubo un error al actualizar el cliente");
+                    if (err.status === 401) {
+                        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                        window.location.href = '../../login.html';
+                    } else {
+                        alert("Hubo un error al actualizar el cliente");
+                    }
                 }
             });
         }
@@ -183,13 +221,19 @@ $(document).ready(function () {
         $.ajax({
             url: `http://localhost:8080/api/clients/${id}`,
             method: 'DELETE',
+            headers: authHeaders,
             success: function () {
                 row.remove();
                 alert('Cliente eliminado correctamente');
             },
             error: function (xhr) {
                 console.error("Error al eliminar cliente:", xhr);
-                alert('Error al eliminar el cliente');
+                if (xhr.status === 401) {
+                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    window.location.href = '../../login.html';
+                } else {
+                    alert('Error al eliminar el cliente');
+                }
             }
         });
     }
@@ -204,10 +248,16 @@ $(document).ready(function () {
         $.ajax({
             url: `http://localhost:8080/api/clients/search?query=${query}`,
             method: 'GET',
+            headers: authHeaders,
             success: renderClients,
             error: function (xhr, status, error) {
                 console.error('Error al buscar clientes:', error);
-                $('#clientsTableBody').empty().append('<tr><td colspan="8" class="text-center">Error al buscar clientes</td></tr>');
+                if (xhr.status === 401) {
+                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    window.location.href = '../../login.html';
+                } else {
+                    $('#clientsTableBody').empty().append('<tr><td colspan="8" class="text-center">Error al buscar clientes</td></tr>');
+                }
             }
         });
     }

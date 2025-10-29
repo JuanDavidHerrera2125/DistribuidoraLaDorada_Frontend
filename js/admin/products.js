@@ -1,218 +1,173 @@
+// js/admin/products.js
 $(document).ready(function () {
-  console.log("✅ products.js cargado");
+    console.log("✅ products.js cargado");
 
-  // Inicializa la fecha de registro con la fecha actual
-  const today = new Date().toISOString().split('T')[0];
-  $('#registrationDate').val(today);
-
-  // Mostrar/ocultar campo de nombre personalizado según selección
-  $('#nameSelect').on('change', function () {
-    const show = $(this).val() === 'Otro';
-    $('#customNameContainer').toggle(show);
-    updateUnitPrice(); // Recalcular precio cuando cambia el nombre
-  });
-
-  // Actualizar precio cuando cambia el modelo (tipo de diseño)
-  $('#model').on('change', function () {
-    updateUnitPrice();
-  });
-
-  // Precios base para los nombres de producto (deben coincidir con backend)
-  const BASE_PRICES = {
-    "Silla Mesedora": 100000,
-    "Silla Fija": 90000,
-    "Silla Barra": 110000,
-    "Silla Sala": 95000,
-    "Silla Huevo": 85000,
-    "Silla Columpio": 105000,
-    "Silla Pequeña": 75000,
-    "Silla Brazona": 120000
-  };
-
-  // Precios base para los modelos (tipos de diseño)
-  const DESIGN_PRICES = {
-    "Wuayú": 80000,
-    "Canasta": 60000,
-    "Sencilla": 40000,
-    "Extra Grande": 100000,
-    "Fútbol": 50000,
-    "Imagen": 75000
-  };
-
-  /**
-   * Calcula y actualiza el campo "Precio Unitario" sumando
-   * precio base (nombre) + precio de diseño (modelo).
-   */
-  function updateUnitPrice() {
-    let name = $('#nameSelect').val();
-    if (name === 'Otro') {
-      name = $('#customName').val().trim();
-    }
-    const model = $('#model').val();
-
-    const basePrice = BASE_PRICES[name] || 0;
-    const designPrice = DESIGN_PRICES[model] || 0;
-    const totalPrice = basePrice + designPrice;
-
-    $('#unitPrice').val(totalPrice);
-  }
-
-  // Recalcular precio si el usuario escribe un nombre personalizado
-  $('#customName').on('input', function () {
-    if ($('#nameSelect').val() === 'Otro') {
-      updateUnitPrice();
-    }
-  });
-
-  /**
-   * Maneja el envío del formulario para crear un nuevo producto.
-   * Valida campos y hace peticiones AJAX para crear producto y stock.
-   */
-  $('#productForm').on('submit', function (e) {
-    e.preventDefault();
-
-    // Validar nombre del producto
-    let name = $('#nameSelect').val();
-    if (name === 'Otro') {
-      name = $('#customName').val().trim();
-      if (!name) {
-        alert('Por favor, ingrese un nombre personalizado.');
-        $('#customName').focus();
-        return;
-      }
-    } else if (!name) {
-      alert('Seleccione un nombre de producto.');
-      $('#nameSelect').focus();
-      return;
+    // 🔑 Verificar autenticación INMEDIATAMENTE
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert('Debes iniciar sesión para acceder a esta página');
+        window.location.href = '/login.html';
+        return; // ¡Detener toda ejecución!
     }
 
-    // Validar precio unitario
-    const unitPrice = parseFloat($('#unitPrice').val());
-    if (isNaN(unitPrice) || unitPrice <= 0) {
-      alert('El precio debe ser un número mayor a 0.');
-      $('#unitPrice').focus();
-      return;
-    }
-
-    // Validar modelo (tipo de diseño)
-    const model = $('#model').val();
-    if (!model) {
-      alert('Seleccione un tipo de diseño.');
-      $('#model').focus();
-      return;
-    }
-
-    // Validar stock inicial
-    const initialStock = parseInt($('#initialStock').val(), 10);
-    if (isNaN(initialStock) || initialStock < 0) {
-      alert('El stock debe ser un número mayor o igual a 0.');
-      $('#initialStock').focus();
-      return;
-    }
-
-    // Estado activo/inactivo
-    const active = $('#active').val() === 'true';
-
-    // Construcción del objeto producto para enviar al backend
-    const productData = {
-      name: name,
-      description: $('#description').val().trim(),
-      unitPrice: unitPrice,
-      model: model,
-      registrationDate: $('#registrationDate').val(),
-      active: active
+    const AUTH_HEADERS = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
     };
 
-    // Petición AJAX para crear producto
-    $.ajax({
-      url: 'http://localhost:8080/api/products',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(productData),
-      success: function (product) {
-        // Si producto creado, crear o actualizar stock
-        $.ajax({
-          url: 'http://localhost:8080/api/stocks',
-          type: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify({
-            productId: product.id,
-            currentStock: initialStock
-          }),
-          success: function (stock) {
-            alert(`✅ Producto "${product.name}" creado con stock: ${initialStock}`);
-            window.location.href = 'stock.html'; // Redirigir a lista de stock
-          },
-          error: function (xhr) {
-            console.error('Error al crear stock:', xhr);
-            if (xhr.status === 409 || xhr.status === 400) {
-              // Si stock ya existe, actualizar con PUT
-              $.ajax({
-                url: `http://localhost:8080/api/stocks/product/${product.id}`,
-                type: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify({ currentStock: initialStock }),
-                success: function () {
-                  alert(`✅ Producto creado y stock actualizado`);
-                  window.location.href = 'stock.html';
-                },
-                error: function () {
-                  alert('⚠️ Producto creado, pero no se pudo asignar el stock.');
-                  window.location.href = 'stock.html';
-                }
-              });
-            } else {
-              alert('⚠️ Producto creado, pero error en stock. Revise el panel.');
-              window.location.href = 'stock.html';
-            }
-          }
-        });
-      },
-      error: function (xhr) {
-        console.error('Error al crear producto:', xhr);
-        const errorMsg = xhr.responseJSON?.message || 'No se pudo crear el producto.';
-        alert('❌ Error: ' + errorMsg);
-      }
+    // ✅ Resto del código SOLO si hay token
+    const today = new Date().toISOString().split('T')[0];
+    $('#registrationDate').val(today);
+
+    const BASE_PRICES = {
+        "Silla Mesedora": 100000,
+        "Silla Fija": 90000,
+        "Silla Barra": 110000,
+        "Silla Sala": 95000,
+        "Silla Huevo": 85000,
+        "Silla Columpio": 105000,
+        "Silla Pequeña": 75000,
+        "Silla Brazona": 120000
+    };
+
+    const DESIGN_PRICES = {
+        "Wuayú": 80000,
+        "Canasta": 60000,
+        "Sencilla": 40000,
+        "Extra Grande": 100000,
+        "Fútbol": 50000,
+        "Imagen": 75000
+    };
+
+    $('#nameSelect').on('change', function () {
+        const show = $(this).val() === 'Otro';
+        $('#customNameContainer').toggle(show);
+        updateUnitPrice();
     });
-  });
 
-  /**
-   * Carga los productos con stock para mostrarlos en la tabla
-   * Actualiza dinámicamente el contenido de #stockTable.
-   */
- function loadStockTable() {
-    const $table = $('#stockTable');
-    $table.empty().append('<tr><td colspan="4" class="text-center">Cargando productos...</td></tr>');
+    $('#model').on('change', updateUnitPrice);
+    $('#customName').on('input', function () {
+        if ($('#nameSelect').val() === 'Otro') updateUnitPrice();
+    });
 
-    $.get('http://localhost:8080/api/products/with-stock')
-        .done(function (products) {
-            $table.empty();
+    function updateUnitPrice() {
+        let name = $('#nameSelect').val();
+        if (name === 'Otro') name = $('#customName').val().trim();
+        const model = $('#model').val();
 
-            if (!products || products.length === 0) {
-                $table.append('<tr><td colspan="4" class="text-center text-muted">No hay productos registrados.</td></tr>');
-                return;
-            }
+        const base = BASE_PRICES[name] || 0;
+        const design = DESIGN_PRICES[model] || 0;
+        $('#unitPrice').val(base + design || '');
+    }
 
-            console.log('✅ Productos con stock recibidos:', products); // ← Ya lo tienes
+    let isSubmitting = false;
+    $('#productForm').on('submit', function (e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+        isSubmitting = true;
 
-            products.forEach(product => {
-                // 🔍 Depuración: veamos qué tiene el objeto
-                console.log('📦 Producto individual:', product);
+        // Validaciones (igual que antes)
+        let name = $('#nameSelect').val();
+        if (name === 'Otro') {
+            name = $('#customName').val().trim();
+            if (!name) { alert('Ingrese nombre personalizado'); isSubmitting = false; return; }
+        } else if (!name) {
+            alert('Seleccione tipo de silla'); isSubmitting = false; return;
+        }
 
-                $table.append(`
-                    <tr>
-                        <td>${product.name || 'Sin nombre'}</td>
-                        <td><span class="badge bg-info">${product.model || 'Sin diseño'}</span></td>
-                        <td>$${(product.unitPrice ?? 0).toLocaleString('es-CO')}</td>
-                        <td>${product.currentStock ?? 0}</td>
-                    </tr>
-                `);
-            });
-        })
-        .fail(function (xhr) {
-            console.error('❌ Error al cargar productos:', xhr);
-            $table.empty().append('<tr><td colspan="4" class="text-center text-danger">Error cargando productos.</td></tr>');
+        const unitPrice = parseFloat($('#unitPrice').val());
+        const model = $('#model').val();
+        const initialStock = parseInt($('#initialStock').val(), 10);
+
+        if (isNaN(unitPrice) || unitPrice <= 0) { alert('Precio inválido'); isSubmitting = false; return; }
+        if (!model) { alert('Seleccione diseño'); isSubmitting = false; return; }
+        if (isNaN(initialStock) || initialStock < 0) { alert('Stock inválido'); isSubmitting = false; return; }
+
+        const productData = {
+            name,
+            description: $('#description').val().trim(),
+            unitPrice,
+            model,
+            registrationDate: $('#registrationDate').val(),
+            active: $('#active').val() === 'true',
+            initialStock
+        };
+
+        $.ajax({
+            url: 'http://localhost:8080/api/products/create-with-stock',
+            type: 'POST',
+            headers: AUTH_HEADERS, // ✅ Usamos el header predefinido
+             data: JSON.stringify(productData),
+            success: function (product) {
+                alert(`✅ Producto "${product.name}" registrado`);
+                window.location.href = 'stock.html';
+            },
+            error: function (xhr) {
+                console.error('Error:', xhr);
+                alert('❌ Error: ' + (xhr.responseJSON?.message || 'No autorizado. Inicia sesión nuevamente.'));
+
+                // Si es 401, limpiar y redirigir
+                if (xhr.status === 401) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = '/login.html';
+                }
+            },
+            complete: () => { isSubmitting = false; }
         });
-}
+    });
 
+    // Cargar tabla de stock si existe
+    if ($('#stockTable').length > 0) {
+        loadStockTable();
+    }
+
+    function loadStockTable() {
+        const $tbody = $('#stockTable tbody');
+        $tbody.empty().append('<tr><td colspan="4" class="text-center">Cargando...</td></tr>');
+
+        $.ajax({
+            url: 'http://localhost:8080/api/products/with-stock',
+            headers: AUTH_HEADERS,
+            success: function (products) {
+                $tbody.empty();
+                if (!Array.isArray(products) || products.length === 0) {
+                    $tbody.append('<tr><td colspan="4" class="text-center">Sin productos</td></tr>');
+                    return;
+                }
+
+                const grouped = {};
+                products.forEach(p => {
+                    const key = `${p.name}__${p.model}`;
+                    if (!grouped[key]) {
+                        grouped[key] = { name: p.name, model: p.model, unitPrice: p.unitPrice, totalStock: 0 };
+                    }
+                    grouped[key].totalStock += (p.stock?.quantity || 0);
+                });
+
+                Object.values(grouped).forEach(p => {
+                    $tbody.append(`
+                        <tr>
+                            <td>${escapeHtml(p.name)}</td>
+                            <td class="text-center"><span class="badge bg-info">${escapeHtml(p.model)}</span></td>
+                            <td class="text-center">$${(p.unitPrice).toLocaleString('es-CO')}</td>
+                            <td class="text-center">${p.totalStock}</td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (xhr) {
+                $tbody.empty().append(`<tr><td colspan="4" class="text-center text-danger">Error: ${xhr.status}</td></tr>`);
+                if (xhr.status === 401) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = '/login.html';
+                }
+            }
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 });

@@ -1,7 +1,24 @@
+// js/seller/salesDashboard.js
 $(document).ready(function () {
+    console.log("✅ salesDashboard.js cargado");
+
     let client = null;
     let today = new Date().toISOString().split('T')[0];
     $('#date').val(today);
+
+    // 🔑 Función para obtener headers de autenticación
+    function getAuthHeaders() {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Debes iniciar sesión para acceder a esta página');
+            window.location.href = '../../login.html';
+            return null;
+        }
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
 
     // Recuperar cliente desde localStorage
     const savedClient = localStorage.getItem('selectedClient');
@@ -20,11 +37,8 @@ $(document).ready(function () {
 
     // Validar que haya cliente
     if (!client || !client.id) {
-        // Si no hay cliente seleccionado, redirigir a la página de clientes
-        // Solo mostrar mensaje si no estamos en la página de clientes
         if (!window.location.pathname.includes('clients.html')) {
-            // No redirigir automáticamente para evitar problemas de navegación
-            // Solo mostrar mensaje informativo
+            alert('No hay cliente seleccionado. Por favor, selecciona un cliente.');
         }
     }
 
@@ -32,35 +46,42 @@ $(document).ready(function () {
     const $productSelect = $('#product');
     $productSelect.empty().append('<option value="">Cargando productos...</option>');
 
-    $.get('http://localhost:8080/api/products/with-stock', function (products) {
-        $productSelect.empty().append('<option value="">Seleccione un producto</option>');
+    const headers = getAuthHeaders();
+    if (!headers) return;
 
-        products.forEach(function (product) {
-            // Solo si tiene stock
-            if (product.currentStock > 0) {
-                const displayName = `${product.name} - ${product.model}`;
-                const price = product.unitPrice;
+    $.ajax({
+        url: 'http://localhost:8080/api/products/with-stock',
+        method: 'GET',
+        headers: headers,
+        success: function (products) {
+            $productSelect.empty().append('<option value="">Seleccione un producto</option>');
 
-                $productSelect.append(`
-                    <option value="${product.productId}"
-                            data-name="${displayName}"
-                            data-price="${price}"
-                            data-stock="${product.currentStock}">
-                        ${displayName} ($${price.toLocaleString('es-CO')} COP) - Stock: ${product.currentStock}
-                    </option>
-                `);
+            products.forEach(function (product) {
+                if (product.currentStock > 0) {
+                    const displayName = `${product.name} - ${product.model}`;
+                    const price = product.unitPrice;
+
+                    $productSelect.append(`
+                        <option value="${product.productId}"
+                                data-name="${displayName}"
+                                data-price="${price}"
+                                data-stock="${product.currentStock}">
+                            ${displayName} ($${price.toLocaleString('es-CO')} COP) - Stock: ${product.currentStock}
+                        </option>
+                    `);
+                }
+            });
+
+            if ($productSelect.children('option').length === 1) {
+                $productSelect.append('<option disabled>No hay productos disponibles</option>');
             }
-        });
-
-        if ($productSelect.children('option').length === 1) {
-            $productSelect.append('<option disabled>No hay productos disponibles</option>');
+        },
+        error: function () {
+            $productSelect.empty().append('<option value="">Error al cargar productos</option>');
         }
-
-    }).fail(function () {
-        $productSelect.empty().append('<option value="">Error al cargar productos</option>');
     });
 
-    // 🔄 Cuando se selecciona un producto, actualizar precio y max de cantidad
+    // 🔄 Actualizar precio y cantidad
     $productSelect.on('change', function () {
         const $option = $productSelect.find('option:selected');
         const price = $option.data('price');
@@ -80,14 +101,14 @@ $(document).ready(function () {
         }
     });
 
-    // 🔒 Bloquear teclas no deseadas: '-', 'e', '+', '.', ','
+    // 🔒 Bloquear teclas no deseadas
     $('#quantity').on('keydown', function (e) {
         if (['-', 'e', 'E', '+', '.', ','].includes(e.key)) {
             e.preventDefault();
         }
     });
 
-    // 📝 Validar cantidad en tiempo real (input y change)
+    // 📝 Validar cantidad
     $('#quantity').on('input change', function () {
         let value = parseInt($(this).val(), 10);
         const max = parseInt($(this).attr('max')) || Infinity;
@@ -123,7 +144,6 @@ $(document).ready(function () {
             return;
         }
 
-        // 📦 Datos de la venta (ajustados al DTO esperado por el backend)
         const saleData = {
             clientName: client.name,
             clientPhone: client.phone,
@@ -136,19 +156,17 @@ $(document).ready(function () {
         const $submitBtn = $('button[type="submit"]');
         $submitBtn.prop('disabled', true).text('Registrando...');
 
-        // 🚀 Enviar venta al endpoint correcto
+        // 🚀 AJAX con token
         $.ajax({
             url: 'http://localhost:8080/api/sales/create',
             method: 'POST',
+            headers: headers,
             contentType: 'application/json',
             data: JSON.stringify(saleData),
             success: function (response) {
                 alert('✅ Venta registrada correctamente');
-
-                // ✅ Abrir ventana con detalle de la venta
                 openSaleDetailWindow(response);
 
-                // ✅ Actualizar stock localmente
                 const $option = $productSelect.find(`option[value="${productId}"]`);
                 const currentStock = $option.data('stock');
                 const newStock = currentStock - quantity;
@@ -160,7 +178,6 @@ $(document).ready(function () {
                            .text($option.text().replace(/Stock: \d+/, `Stock: ${newStock}`));
                 }
 
-                // Resetear formulario
                 $productSelect.val('');
                 $('#quantity').val('');
                 $('#price').val('');
@@ -170,7 +187,12 @@ $(document).ready(function () {
                 if (xhr.responseJSON?.message) {
                     errorMsg = xhr.responseJSON.message;
                 }
-                alert('❌ ' + errorMsg);
+                if(xhr.status === 401) {
+                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    window.location.href = '../../login.html';
+                } else {
+                    alert('❌ ' + errorMsg);
+                }
             },
             complete: function () {
                 $submitBtn.prop('disabled', false).text('Registrar Venta');
@@ -254,53 +276,31 @@ $(document).ready(function () {
         win.document.close();
     }
 
-    // Eventos para botones
-    $('#btnRefreshDashboard').on('click', function() {
-        // Recargar datos
-        location.reload();
-    });
-
-    $('#btnCancelSale').on('click', function() {
-        // Limpiar formulario
-        $('#saleForm')[0].reset();
-        $('#date').val(today);
-        $productSelect.val('');
-        $('#quantity').val('1');
+    // Botones de dashboard
+    $('#btnRefreshDashboard').on('click', function() { location.reload(); });
+    $('#btnCancelSale').on('click', function() { 
+        $('#saleForm')[0].reset(); 
+        $('#date').val(today); 
+        $productSelect.val(''); 
+        $('#quantity').val('1'); 
         $('#price').val('');
     });
 
-    // Botones de navegación
-    $('#btnNewSaleFromSalesTab').on('click', function() {
-        // Cambiar a la pestaña de dashboard
-        $('#dashboard-tab').click();
-    });
+    $('#btnNewSaleFromSalesTab').on('click', function() { $('#dashboard-tab').click(); });
+    $('#btnNewClient').on('click', function() { window.location.href = '../seller/clients.html'; });
+    $('#btnNewProduct').on('click', function() { window.location.href = '../seller/products.html'; });
 
-    $('#btnNewClient').on('click', function() {
-        // Redirigir a la página de clientes
-        window.location.href = '../seller/clients.html';
+    // Búsquedas
+    $('#btnSearchSales').on('click', function() { 
+        const query = $('#sales-search').val(); 
+        alert('Buscando ventas por: ' + query); 
     });
-
-    $('#btnNewProduct').on('click', function() {
-        // Redirigir a la página de productos
-        window.location.href = '../seller/products.html';
+    $('#btnSearchProducts').on('click', function() { 
+        const query = $('#products-search').val(); 
+        alert('Buscando productos por: ' + query); 
     });
-
-    // Botones de búsqueda
-    $('#btnSearchSales').on('click', function() {
-        // Implementar búsqueda de ventas
-        const query = $('#sales-search').val();
-        alert('Buscando ventas por: ' + query);
-    });
-
-    $('#btnSearchProducts').on('click', function() {
-        // Implementar búsqueda de productos
-        const query = $('#products-search').val();
-        alert('Buscando productos por: ' + query);
-    });
-
-    $('#btnSearchClients').on('click', function() {
-        // Implementar búsqueda de clientes
-        const query = $('#clients-search').val();
-        alert('Buscando clientes por: ' + query);
+    $('#btnSearchClients').on('click', function() { 
+        const query = $('#clients-search').val(); 
+        alert('Buscando clientes por: ' + query); 
     });
 });

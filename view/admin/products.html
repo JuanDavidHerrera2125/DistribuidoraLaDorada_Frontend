@@ -12,7 +12,8 @@
   <!-- Tus estilos -->
   <link rel="stylesheet" href="../../asset/css/style.css">
 
-  <script src="../js/auth.js"></script>
+  <!-- ✅ Ruta corregida para auth.js -->
+  <script src="../../js/auth.js"></script>
   <script>
       document.addEventListener('DOMContentLoaded', function() {
           checkAuth(['ADMIN']); // Solo permite ADMIN
@@ -135,6 +136,5 @@
   </script>
 
   <script src="../../js/admin/products.js"></script>
-  <!-- ❌ ELIMINADO: carga duplicada de auth.js (ya está en el head) -->
 </body>
 </html>
