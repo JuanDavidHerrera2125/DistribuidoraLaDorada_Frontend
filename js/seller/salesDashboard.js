@@ -1,4 +1,3 @@
-// js/seller/salesDashboard.js
 $(document).ready(function () {
     console.log("✅ salesDashboard.js cargado");
 
@@ -122,6 +121,98 @@ $(document).ready(function () {
         }
     });
 
+    // ======================
+    // Función para actualizar Stats Cards y Info Rápida
+    // ======================
+    function updateDashboardStats() {
+        const headers = getAuthHeaders();
+        if (!headers) return;
+
+        // 1️⃣ Ventas de hoy
+        $.ajax({
+            url: 'http://localhost:8080/api/sales/today-sales',
+            method: 'GET',
+            headers: headers,
+            success: function(data) {
+                $('#sales-count').text(data);
+                $('#todays-sales').text(data);
+            },
+            error: function() {
+                console.error('Error al cargar ventas de hoy');
+                $('#sales-count').text('Error');
+                $('#todays-sales').text('Error');
+            }
+        });
+
+        // 2️⃣ Ingresos de hoy
+        $.ajax({
+            url: 'http://localhost:8080/api/sales/today-income',
+            method: 'GET',
+            headers: headers,
+            success: function(data) {
+                $('#revenue-total').text(`$${data.toLocaleString('es-CO')} COP`);
+            },
+            error: function() {
+                console.error('Error al cargar ingresos de hoy');
+                $('#revenue-total').text('$0 COP');
+            }
+        });
+
+        // 3️⃣ Clientes registrados
+        $.ajax({
+            url: 'http://localhost:8080/api/sales/clients-count',
+            method: 'GET',
+            headers: headers,
+            success: function(data) {
+                $('#clients-count').text(data);
+                $('#registered-clients').text(data);
+            },
+            error: function() {
+                console.error('Error al cargar clientes');
+                $('#clients-count').text('Error');
+                $('#registered-clients').text('Error');
+            }
+        });
+
+        // 4️⃣ Productos activos
+        $.ajax({
+            url: 'http://localhost:8080/api/sales/products-count',
+            method: 'GET',
+            headers: headers,
+            success: function(data) {
+                $('#products-count').text(data);
+                $('#active-products').text(data);
+            },
+            error: function() {
+                console.error('Error al cargar productos activos');
+                $('#products-count').text('Error');
+                $('#active-products').text('Error');
+            }
+        });
+
+        // 5️⃣ Información Rápida (stock, etc.)
+        $.ajax({
+            url: 'http://localhost:8080/api/sales/quick-info',
+            method: 'GET',
+            headers: headers,
+            success: function(data) {
+                $('#stock-count').text(data.stockDisponible || 0);
+                $('#active-products').text(data.productosActivos || 0);
+                $('#registered-clients').text(data.clientesRegistrados || 0);
+                $('#todays-sales').text(data.ventasDelDia || 0);
+                // Opcional: actualizar ingresos aquí también
+                $('#revenue-total').text(`$${(data.ingresosDelDia || 0).toLocaleString('es-CO')} COP`);
+            },
+            error: function() {
+                console.error('Error al cargar información rápida');
+                $('#stock-count').text('Error');
+            }
+        });
+    }
+
+    // Ejecutar al cargar la página
+    updateDashboardStats();
+
     // ✅ Manejo del formulario de venta
     $('#saleForm').on('submit', function (e) {
         e.preventDefault();
@@ -181,6 +272,9 @@ $(document).ready(function () {
                 $productSelect.val('');
                 $('#quantity').val('');
                 $('#price').val('');
+
+                // Actualizar Stats después de la venta
+                updateDashboardStats();
             },
             error: function (xhr) {
                 let errorMsg = 'Error al registrar la venta.';
@@ -277,7 +371,7 @@ $(document).ready(function () {
     }
 
     // Botones de dashboard
-    $('#btnRefreshDashboard').on('click', function() { location.reload(); });
+    $('#btnRefreshDashboard').on('click', function() { updateDashboardStats(); });
     $('#btnCancelSale').on('click', function() { 
         $('#saleForm')[0].reset(); 
         $('#date').val(today); 
