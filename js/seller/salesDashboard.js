@@ -293,82 +293,126 @@ $(document).ready(function () {
             }
         });
     });
-
-    // ✅ Función para abrir ventana de detalle
-    function openSaleDetailWindow(sale) {
-        const ventaHtml = `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Detalle de Venta #${sale.id}</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-                <style>
-                    body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
-                    .header { background: #0d6efd; color: white; border-radius: 8px; padding: 15px; text-align: center; }
-                    .total { font-weight: bold; font-size: 1.3rem; color: #0d6efd; }
-                    .footer { margin-top: 30px; text-align: center; font-size: 0.9rem; color: #6c757d; }
-                </style>
-            </head>
-            <body class="p-4">
-                <div class="header mb-4">
-                    <h3>Distribuidora La Dorada</h3>
-                    <p><strong>Venta #${sale.id}</strong> | ${new Date(sale.date).toLocaleString('es-CO')}</p>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">Cliente</div>
-                    <div class="card-body">
-                        <p><strong>Nombre:</strong> ${sale.clientName}</p>
-                        <p><strong>Teléfono:</strong> ${sale.clientPhone}</p>
-                        <p><strong>Dirección:</strong> ${sale.clientAddress}</p>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">Productos</div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Modelo</th>
-                                    <th>Cant.</th>
-                                    <th>P. Unit.</th>
-                                    <th>Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${sale.details.map(d => `
-                                    <tr> 
-                                        <td>${d.productName}</td>
-                                        <td>${d.productModel}</td>
-                                        <td>${d.quantity}</td>
-                                        <td>$${d.unitPrice.toLocaleString('es-CO')}</td>
-                                        <td>$${d.subtotal.toLocaleString('es-CO')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="text-end total">
-                    Total: $${sale.total.toLocaleString('es-CO')} COP
-                </div>
-
-                <div class="footer">
-                    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">🖨️ Imprimir</button>
-                </div>
-            </body>
-            </html>
-        `;
-
-        const win = window.open('', '_blank', 'width=800,height=600');
-        win.document.write(ventaHtml);
-        win.document.close();
+function openSaleDetailWindow(sale) {
+    // 🛑 Validar que sale exista
+    if (!sale) {
+        alert("Error: Datos de venta no disponibles.");
+        return;
     }
+
+    // 🛑 Asegurar formato de fecha LOCALDATETIME -> cadena
+    const fechaVenta = sale.date
+        ? new Date(sale.date).toLocaleString('es-CO', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : "Sin fecha";
+
+    // 🛑 Render seguro de totales
+    const total = sale.total
+        ? Number(sale.total).toLocaleString('es-CO')
+        : "0";
+
+    // ✅ Construir el detalle del producto desde los datos actuales del formulario
+    const productId = $('#product').val();
+    const productName = $('#product option:selected').data('name') || '';
+    const quantity = parseInt($('#quantity').val(), 10) || 0;
+    const unitPrice = parseFloat($('#price').val()) || 0;
+    const subtotal = quantity * unitPrice;
+
+    // ✅ Crear un objeto "detalle" temporal para mostrar
+    const details = [
+        {
+            productName: productName.split(' - ')[0] || '', // Nombre sin modelo
+            productModel: productName.split(' - ')[1] || '', // Modelo
+            quantity: quantity,
+            unitPrice: unitPrice,
+            subtotal: subtotal
+        }
+    ];
+
+    const ventaHtml = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Detalle de Venta #${sale.id}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
+                .header { background: #0d6efd; color: white; border-radius: 8px; padding: 15px; text-align: center; }
+                .total { font-weight: bold; font-size: 1.3rem; color: #0d6efd; }
+                .footer { margin-top: 30px; text-align: center; font-size: 0.9rem; color: #6c757d; }
+            </style>
+        </head>
+        <body class="p-4">
+
+            <div class="header mb-4">
+                <h3>Distribuidora La Dorada</h3>
+                <p><strong>Venta #${sale.id}</strong> | ${fechaVenta}</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">Cliente</div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> ${sale.clientName ?? "No registrado"}</p>
+                    <p><strong>Teléfono:</strong> ${sale.clientPhone ?? "No registrado"}</p>
+                    <p><strong>Dirección:</strong> ${sale.clientAddress ?? "No registrada"}</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">Productos</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Modelo</th>
+                                <th>Cant.</th>
+                                <th>P. Unit.</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${details.length === 0 
+                                ? `<tr><td colspan="5" class="text-center text-muted">Sin productos registrados</td></tr>` 
+                                : details.map(d => `
+                                    <tr> 
+                                        <td>${d.productName ?? ""}</td>
+                                        <td>${d.productModel ?? ""}</td>
+                                        <td>${d.quantity ?? 0}</td>
+                                        <td>$${Number(d.unitPrice ?? 0).toLocaleString('es-CO')}</td>
+                                        <td>$${Number(d.subtotal ?? 0).toLocaleString('es-CO')}</td>
+                                    </tr>
+                                `).join('')
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-end total">
+                Total: $${total} COP
+            </div>
+
+            <div class="footer">
+                <button onclick="window.print()" class="btn btn-outline-primary btn-sm">🖨️ Imprimir</button>
+            </div>
+
+        </body>
+        </html>
+    `;
+
+    const win = window.open('', '_blank', 'width=800,height=600');
+    win.document.write(ventaHtml);
+    win.document.close();
+}
+
 
     // Botones de dashboard
     $('#btnRefreshDashboard').on('click', function() { updateDashboardStats(); });
