@@ -1,20 +1,254 @@
-/* ===== Campos editables ===== */
-.editing-cell input {
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: #e0ffe0; /* Fondo verde suave */
-    border: 2px solid #28a745; /* Borde verde */
-    padding: 6px 10px;
-    transition: all 0.3s ease;
+/* ========================================
+   ESTILOS COMPLETOS - DISTRIBUIDORA LA DORADA
+   ======================================== */
+
+/* ===== VARIABLES GLOBALES ===== */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #6c757d;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
+    --light-color: #f8f9fa;
+    --dark-color: #2c3e50;
+    
+    --sidebar-width: 250px;
+    --sidebar-bg: #2c3e50;
+    --sidebar-hover: rgba(255,255,255,0.1);
+    --sidebar-active: #3498db;
+    
+    --card-shadow: 0 4px 8px rgba(0,0,0,0.075);
+    --card-hover-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    
+    --transition: all 0.3s ease;
 }
 
-/* ===== Botón en modo guardar ===== */
-.btn-save {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: white !important;
+/* ===== Estilos generales ===== */
+body {
+    background-color: #f8f9fa;
+    font-size: 1.05rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    overflow-x: hidden;
+    /* 👇 FIX: Permitir scrolling en body */
+    overflow-y: auto;
 }
 
+body.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+/* ===== BOTÓN MENÚ PARA MÓVIL ===== */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.menu-toggle:hover {
+    background: #2980b9;
+    transform: scale(1.05);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    background: linear-gradient(180deg, #2c3e50, #1a2530);
+    color: white;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    width: var(--sidebar-width);
+    transition: var(--transition);
+    overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar a {
+    color: #bdc3c7;
+    text-decoration: none;
+    padding: 12px 20px;
+    display: block;
+    transition: all 0.3s;
+    border-left: 4px solid transparent;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    border-left: 4px solid #3498db;
+}
+
+.sidebar .nav-link {
+    color: #bdc3c7;
+    padding: 12px 20px;
+    margin: 5px 0;
+    border-radius: 0 25px 25px 0;
+    transition: var(--transition);
+    display: block;
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--sidebar-hover);
+    color: white;
+    border-left: 4px solid var(--sidebar-active);
+    box-shadow: 4px 0 8px rgba(52, 152, 219, 0.3);
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* ===== Subtítulo del sidebar ===== */
+.sidebar .text-center p {
+    color: #fff !important;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    transition: var(--transition);
+    overflow-y: auto;
+    min-height: 100vh;
+}
+
+/* ===== RESPONSIVE - MOBILE FIXES ===== */
+@media (max-width: 768px) {
+    /* 👇 FIX: Mostrar botón menú en móvil */
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* 👇 FIX: Sidebar oculto por defecto en móvil */
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        height: 100vh;
+        z-index: 1000;
+    }
+    
+    /* 👇 FIX: Sidebar visible cuando se abre */
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    /* 👇 FIX: Main content sin margin cuando sidebar está cerrado */
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+        transition: margin 0.3s ease;
+        overflow-y: auto;
+        min-height: calc(100vh - 60px);
+    }
+    
+    /* 👇 FIX: Main content con margin cuando sidebar está abierto */
+    .sidebar.show + .main-content {
+        margin-left: 280px;
+    }
+    
+    /* 👇 FIX: Ajustar padding en móvil */
+    .card-body {
+        padding: 12px;
+    }
+    
+    /* 👇 FIX: Tablas con scroll en móvil */
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    /* 👇 FIX: Cards con margin reducido */
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        margin-bottom: 15px;
+        padding: 20px 15px;
+    }
+    
+    /* 👇 FIX: Botones más pequeños en móvil */
+    .nav-tabs .nav-link {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    /* 👇 FIX: Footer ajustado */
+    .footer {
+        padding: 12px 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-card i {
+        font-size: 2rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .login-container .card {
+        max-width: 95%;
+        padding: 1.5rem;
+    }
+}
+
+/* ===== Resto de estilos (mantenidos igual) ===== */
 /* ===== Fondo general ===== */
 body.bg-light {
     background-color: #f8f9fa !important;
@@ -43,114 +277,110 @@ button:hover {
 tr.selected {
     background-color: #cce5ff !important;
 }
- 
-/* ===== Estilos generales ===== */
-body {
-    background-color: #f8f9fa;
-    font-size: 1.05rem; /* Aumenta un poco la letra en general */
-}
 
-.sidebar {
-    background: linear-gradient(180deg, #2c3e50, #1a2530);
-    color: white;
-    height: 100vh;
-    position: fixed;
-    padding-top: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
-}
-
-.sidebar a {
-    color: #bdc3c7;
-    text-decoration: none;
-    padding: 12px 20px;
-    display: block;
-    transition: all 0.3s;
-    border-left: 4px solid transparent;
-}
-
-.sidebar a:hover, .sidebar a.active {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-    border-left: 4px solid #3498db;
-}
-
-/* ===== Subtítulo del sidebar ===== */
-.sidebar .text-center p {
-    color: #fff !important; /* Forzar blanco */
-}
-
-.main-content {
-    margin-left: 250px;
+/* ===== Header ===== */
+.main-content .d-flex.justify-content-between.align-items-center {
+    background: white;
     padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
 }
 
+.main-content h2 {
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.main-content h2 i {
+    color: var(--primary-color);
+}
+
+/* ===== CARDS ===== */
 .card {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     border: 1px solid rgba(0,0,0,.125);
     border-radius: 0.5rem;
     margin-bottom: 20px;
+    transition: var(--transition);
+    border: none;
+    background: white;
 }
 
-.header-card {
-    background: linear-gradient(90deg, #3498db, #2c3e50);
-    color: white;
+.card:hover {
+    box-shadow: var(--card-hover-shadow);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 2px solid var(--primary-color);
+    padding: 15px 20px;
     border-radius: 0.5rem 0.5rem 0 0 !important;
 }
 
-.nav-tabs .nav-link {
-    color: #3498db;
+.card-header.header-card {
+    background: linear-gradient(90deg, #3498db, #2c3e50);
+    color: white;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    border-bottom: none;
+}
+
+.card-header.header-card h5 {
+    color: white;
     font-weight: 600;
 }
 
-.nav-tabs .nav-link.active {
-    color: #2c3e50;
-    border-bottom: 3px solid #3498db;
+.card-header.header-card i {
+    color: white;
 }
 
-.action-btn {
-    margin: 0 5px;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.85rem;
+.card-body {
+    padding: 20px;
 }
 
-.btn-primary {
-    background: linear-gradient(90deg, #3498db, #2c3e50);
-    border: none;
-}
-
-.btn-success {
-    background: linear-gradient(90deg, #2ecc71, #27ae60);
-    border: none;
-}
-
-.btn-warning {
-    background: linear-gradient(90deg, #f39c12, #d35400);
-    border: none;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #e74c3c, #c0392b);
-    border: none;
-}
-
+/* ===== STATS CARDS ===== */
 .stat-card {
     text-align: center;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     color: white;
     margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: rgba(255,255,255,0.3);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
 .stat-card h3 {
     font-size: 2rem;
     margin: 10px 0;
+    font-weight: 700;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 .stat-card i {
     font-size: 2.5rem;
     margin-bottom: 10px;
+    display: block;
 }
 
 .sales-stat {
@@ -169,6 +399,160 @@ body {
     background: linear-gradient(135deg, #9b59b6, #8e44ad);
 }
 
+/* ===== FORMULARIOS ===== */
+.form-label {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1.05rem;
+}
+
+.form-control, .form-select {
+    font-size: 1.05rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* ===== Campos editables ===== */
+.editing-cell input {
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #e0ffe0;
+    border: 2px solid #28a745;
+    padding: 6px 10px;
+    transition: all 0.3s ease;
+}
+
+/* ===== Botón en modo guardar ===== */
+.btn-save {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+}
+
+/* ===== BOTONES ===== */
+.btn {
+    border-radius: 0.375rem;
+    padding: 0.6rem 1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn i {
+    transition: var(--transition);
+}
+
+.btn:hover i {
+    transform: scale(1.1);
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #3498db, #2c3e50) !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #2980b9, #1a252f) !important;
+    transform: scale(1.03);
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #2ecc71, #27ae60) !important;
+    border: none !important;
+}
+
+.btn-success:hover {
+    background: linear-gradient(90deg, #27ae60, #219653) !important;
+    transform: scale(1.03);
+}
+
+.btn-warning {
+    background: linear-gradient(90deg, #f39c12, #d35400) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(90deg, #e67e22, #c0392b) !important;
+    transform: scale(1.03);
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #e74c3c, #c0392b) !important;
+    border: none !important;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #c0392b, #a93226) !important;
+    transform: scale(1.03);
+}
+
+.btn-secondary {
+    background: linear-gradient(90deg, #95a5a6, #7f8c8d) !important;
+    border: none !important;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(90deg, #7f8c8d, #6c7a7a) !important;
+    transform: scale(1.03);
+}
+
+.action-btn {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* ===== TABS ===== */
+.nav-tabs {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+}
+
+.nav-tabs .nav-link {
+    color: #3498db;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: var(--transition);
+}
+
+.nav-tabs .nav-link:hover {
+    color: #2980b9;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    color: #2c3e50;
+    background: white;
+    border-bottom: 3px solid #3498db;
+    font-weight: 600;
+}
+
+/* ===== TABLAS ===== */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table {
+    margin-bottom: 0;
+}
+
 /* ===== Encabezados de tabla de Stock ===== */
 #stockTableContainer {
     max-height: 600px;
@@ -179,19 +563,97 @@ body {
     position: sticky;
     top: 0;
     z-index: 2;
-    background-color: #212529 !important; /* Fondo oscuro */
-    color: #fff !important;               /* Texto blanco */
-    font-size: 1.1rem;                     /* Más grande */
+    background-color: #212529 !important;
+    color: #fff !important;
+    font-size: 1.1rem;
 }
 
 /* ===== Encabezados de todas las tablas (incluyendo ventas) ===== */
 table thead th {
-    color: #000 !important;                /* Texto negro */
-    background-color: #f1f3f5 !important; /* Fondo gris claro */
-    font-weight: 600;                      /* Opcional: letra más gruesa */
-    font-size: 1.05rem;                    /* Opcional: letra un poco más grande */
+    color: #000 !important;
+    background-color: #f1f3f5 !important;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border: none !important;
+    padding: 12px 15px;
 }
 
+table tbody tr {
+    transition: var(--transition);
+}
+
+table tbody tr:hover {
+    background: rgba(52, 152, 219, 0.05);
+}
+
+table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* ===== LIST GROUP ===== */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 12px 15px;
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* ===== INPUT GROUP ===== */
+.input-group {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.input-group .form-control {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.input-group .btn {
+    border-radius: 0;
+}
+
+/* ===== RECENT SALES LIST ===== */
+#recent-sales-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#recent-sales-list .sale-item {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    transition: var(--transition);
+}
+
+#recent-sales-list .sale-item:hover {
+    background: rgba(52, 152, 219, 0.1);
+    cursor: pointer;
+}
+
+#recent-sales-list .sale-item:last-child {
+    border-bottom: none;
+}
+
+/* ===== FOOTER ===== */
 .footer {
     flex-shrink: 0;
     background-color: #2c3e50;
@@ -202,37 +664,62 @@ table thead th {
     margin-top: auto;
 }
 
-/* ===== Responsive adjustments ===== */
-@media (max-width: 768px) {
-    .sidebar {
-        position: relative;
-        height: auto;
-        width: 100%;
-    }
+.footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
 
-    .main-content {
-        margin-left: 0;
-    }
+/* ===== LOADING SPINNER ===== */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
 
-    .stat-card {
-        margin-bottom: 15px;
-    }
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
 
-    /* ===== LOGIN PAGE STYLES - IN SYNC WITH APP ===== */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fadeIn {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ===== LOGIN PAGE STYLES ===== */
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background-color: #f8f9fa; /* Igual que body.bg-light */
+    background-color: #f8f9fa;
 }
 
 .login-container .card {
     width: 100%;
     max-width: 400px;
-    border-radius: 0.75rem; /* Igual que otras cards */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Igual que otras cards */
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     padding: 2rem;
 }
 
@@ -247,7 +734,7 @@ table thead th {
 .login-container .form-label {
     font-weight: 500;
     color: #2c3e50;
-    font-size: 1.05rem; /* Igual que app */
+    font-size: 1.05rem;
 }
 
 .login-container .form-control {
@@ -275,7 +762,7 @@ table thead th {
 
 .login-container .btn-primary:hover {
     transform: scale(1.03);
-    background: linear-gradient(90deg, #2980b9, #1a252f) !important; /* Oscurecer un poco */
+    background: linear-gradient(90deg, #2980b9, #1a252f) !important;
 }
 
 .login-container #errorMsg {
@@ -290,11 +777,45 @@ table thead th {
     transition: all 0.3s ease;
 }
 
-/* Responsive */
-@media (max-width: 576px) {
-    .login-container .card {
-        max-width: 95%;
-        padding: 1.5rem;
-    }
+/* ===== HOVER EFFECTS ===== */
+.btn i {
+    transition: var(--transition);
 }
+
+.btn:hover i {
+    transform: scale(1.1);
 }
+
+/* ==============================
+   TABLAS GRANDES EN MÓVIL
+   ============================== */
+
+@media (max-width: 768px) {
+
+  .main-content {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 900px; /* fuerza scroll horizontal */
+  }
+}
+
+/* Scroll horizontal real para tablas en móvil */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Evita que el texto se rompa en varias líneas */
+#usersTable th,
+#usersTable td {
+    white-space: nowrap;
+}
+

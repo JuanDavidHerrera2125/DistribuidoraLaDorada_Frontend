@@ -1,6 +1,68 @@
-// js/admin/products.js
 $(document).ready(function () {
     console.log("✅ products.js cargado");
+
+    // 🔧 FUNCIÓN PARA ACTUALIZAR SIDEBAR SEGÚN PÁGINA ACTUAL
+    function updateSidebarActiveItem() {
+        const currentPath = window.location.pathname;
+        console.log("📍 Ruta actual:", currentPath);
+        
+        $('.sidebar .nav-link').removeClass('active');
+        $('.sidebar .nav-item').removeClass('active');
+        
+        if (currentPath.includes('dashboard.html')) {
+            $('#sidebarDashboard').addClass('active');
+            console.log("✅ Sidebar: Dashboard activo");
+        } else if (currentPath.includes('products.html')) {
+            $('#sidebarProducts').addClass('active');
+            console.log("✅ Sidebar: Productos activo");
+        } else if (currentPath.includes('clients.html')) {
+            $('#sidebarClients').addClass('active');
+            console.log("✅ Sidebar: Clientes activo");
+        } else if (currentPath.includes('sales.html')) {
+            $('#sidebarSales').addClass('active');
+            console.log("✅ Sidebar: Ventas activo");
+        } else if (currentPath.includes('stock.html')) {
+            $('#sidebarStock').addClass('active');
+            console.log("✅ Sidebar: Inventario activo");
+        } else if (currentPath.includes('settings.html')) {
+            $('#sidebarSettings').addClass('active');
+            console.log("✅ Sidebar: Configuración activo");
+        } else if (currentPath.includes('reports.html')) {
+            $('#sidebarReports').addClass('active');
+            console.log("✅ Sidebar: Reportes activo");
+        }
+    }
+
+    // 🔧 ESPERAR A QUE EL SIDEBAR CARGUE COMPLETAMENTE
+    function waitForSidebar(callback) {
+        let attempts = 0;
+        const maxAttempts = 50;
+        const checkInterval = setInterval(() => {
+            if ($('#sidebarProducts').length > 0) {
+                clearInterval(checkInterval);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.warn("⚠️ Sidebar no cargó después de 5 segundos");
+                callback();
+            }
+            attempts++;
+        }, 100);
+    }
+
+    // 🔧 Función para ajustar responsive
+    function adjustResponsive() {
+        const width = $(window).width();
+        
+        if (width < 768) {
+            $('.card-body').css('padding', '10px');
+            $('.main-content').css('padding', '10px');
+            $('body').css('overflow-y', 'auto');
+        } else {
+            $('.card-body').css('padding', '20px');
+            $('.main-content').css('padding', '20px');
+        }
+    }
 
     // 🔑 Verificar autenticación INMEDIATAMENTE
     const token = localStorage.getItem('authToken');
@@ -14,6 +76,16 @@ $(document).ready(function () {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
     };
+
+    // Ajustar responsive al cargar y al redimensionar
+    adjustResponsive();
+    $(window).on('resize', adjustResponsive);
+
+    // Ejecutar después de que sidebar cargue
+    waitForSidebar(() => {
+        updateSidebarActiveItem();
+        console.log("✅ Sidebar cargado y actualizado");
+    });
 
     // ✅ Resto del código SOLO si hay token
     const today = new Date().toISOString().split('T')[0];
@@ -94,10 +166,10 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: 'http://localhost:8080/api/products/create-with-stock',
+            url: 'http://3.17.146.31:8080/api/products/create-with-stock',
             type: 'POST',
-            headers: AUTH_HEADERS, // ✅ Usamos el header predefinido
-             data: JSON.stringify(productData),
+            headers: AUTH_HEADERS,
+            data: JSON.stringify(productData), // ✅ CORREGIDO: "data" en minúscula
             success: function (product) {
                 alert(`✅ Producto "${product.name}" registrado`);
                 window.location.href = 'stock.html';
@@ -126,7 +198,7 @@ $(document).ready(function () {
         $tbody.empty().append('<tr><td colspan="4" class="text-center">Cargando...</td></tr>');
 
         $.ajax({
-            url: 'http://localhost:8080/api/products/with-stock',
+            url: 'http://3.17.146.31:8080/api/products/with-stock',
             headers: AUTH_HEADERS,
             success: function (products) {
                 $tbody.empty();
@@ -170,4 +242,31 @@ $(document).ready(function () {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // 👇 BOTÓN MENÚ PARA MÓVIL - ADMIN
+    $('#menuToggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.sidebar').toggleClass('show');
+        if ($('.sidebar').hasClass('show')) {
+            $('body').css('overflow', 'hidden');
+        } else {
+            $('body').css('overflow', 'auto');
+        }
+    });
+    
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 768) {
+            if (!$('.sidebar').is(e.target) && 
+                $('.sidebar').has(e.target).length === 0 && 
+                !$('#menuToggle').is(e.target)) {
+                $('.sidebar').removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+        }
+    });
+    
+    $('.sidebar').on('touchmove', function(e) {
+        e.stopPropagation();
+    });
 });

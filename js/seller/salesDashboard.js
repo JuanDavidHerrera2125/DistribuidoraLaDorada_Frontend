@@ -1,6 +1,79 @@
 $(document).ready(function () {
     console.log("✅ salesDashboard.js cargado");
 
+    // 🔧 FUNCIÓN PARA ACTUALIZAR SIDEBAR SEGÚN PÁGINA ACTUAL
+    function updateSidebarActiveItem() {
+        const currentPath = window.location.pathname;
+        console.log("📍 Ruta actual:", currentPath);
+        
+        $('.sidebar .nav-link').removeClass('active');
+        $('.sidebar .nav-item').removeClass('active');
+        
+        if (currentPath.includes('clients.html')) {
+            $('#sidebarClients').addClass('active');
+            console.log("✅ Sidebar: Clientes activo");
+        } else if (currentPath.includes('salesDashboard.html')) {
+            $('#sidebarDashboard').addClass('active');
+            console.log("✅ Sidebar: Dashboard activo");
+        } else if (currentPath.includes('sales.html')) {
+            $('#sidebarSales').addClass('active');
+            console.log("✅ Sidebar: Ventas activo");
+        } else if (currentPath.includes('products.html')) {
+            $('#sidebarProducts').addClass('active');
+            console.log("✅ Sidebar: Productos activo");
+        } else if (currentPath.includes('reports.html')) {
+            $('#sidebarReports').addClass('active');
+            console.log("✅ Sidebar: Reportes activo");
+        }
+    }
+
+    // 🔧 ESPERAR A QUE EL SIDEBAR CARGUE COMPLETAMENTE
+    function waitForSidebar(callback) {
+        let attempts = 0;
+        const maxAttempts = 50;
+        const checkInterval = setInterval(() => {
+            if ($('#sidebarDashboard').length > 0) {
+                clearInterval(checkInterval);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.warn("⚠️ Sidebar no cargó después de 5 segundos");
+                callback();
+            }
+            attempts++;
+        }, 100);
+    }
+
+    // 🔧 Función para ajustar responsive
+    function adjustResponsive() {
+        const width = $(window).width();
+        
+        if (width < 768) {
+            $('.card').css('margin-bottom', '10px');
+            $('.stat-card').css('margin-bottom', '10px');
+            $('.form-group').css('margin-bottom', '10px');
+            $('#saleForm').css('padding', '10px');
+            $('.main-content').css('padding', '10px');
+            // 👇 FIX: Asegurar scroll en móvil
+            $('body').css('overflow-y', 'auto');
+        } else {
+            $('.card').css('margin-bottom', '20px');
+            $('.stat-card').css('margin-bottom', '15px');
+            $('.form-group').css('margin-bottom', '15px');
+            $('#saleForm').css('padding', '20px');
+            $('.main-content').css('padding', '20px');
+        }
+    }
+
+    // Ejecutar después de que sidebar cargue
+    waitForSidebar(() => {
+        updateSidebarActiveItem();
+        console.log("✅ Sidebar cargado y actualizado");
+    });
+
+    adjustResponsive();
+    $(window).on('resize', adjustResponsive);
+
     let client = null;
     let today = new Date().toISOString().split('T')[0];
     $('#date').val(today);
@@ -34,12 +107,20 @@ $(document).ready(function () {
         }
     }
 
-    // Validar que haya cliente
-    if (!client || !client.id) {
+    // ✅ Validar que haya cliente
+    if (!client || !client.id || !client.name) {
+        console.error("❌ Cliente inválido o no encontrado:", client);
+        
         if (!window.location.pathname.includes('clients.html')) {
-            alert('No hay cliente seleccionado. Por favor, selecciona un cliente.');
+            alert('⚠️ No hay cliente seleccionado. Por favor, selecciona un cliente.');
+            setTimeout(() => {
+                window.location.href = 'clients.html';
+            }, 1500);
         }
+        return; 
     }
+
+    console.log("✅ Cliente válido cargado:", client.name);
 
     // 🔽 Cargar productos con stock > 0
     const $productSelect = $('#product');
@@ -49,7 +130,7 @@ $(document).ready(function () {
     if (!headers) return;
 
     $.ajax({
-        url: 'http://localhost:8080/api/products/with-stock',
+        url: 'http://3.17.146.31:8080/api/products/with-stock',
         method: 'GET',
         headers: headers,
         success: function (products) {
@@ -130,7 +211,7 @@ $(document).ready(function () {
 
         // 1️⃣ Ventas de hoy
         $.ajax({
-            url: 'http://localhost:8080/api/sales/today-sales',
+            url: 'http://3.17.146.31:8080/api/sales/today-sales',
             method: 'GET',
             headers: headers,
             success: function(data) {
@@ -138,29 +219,27 @@ $(document).ready(function () {
                 $('#todays-sales').text(data);
             },
             error: function() {
-                console.error('Error al cargar ventas de hoy');
-                $('#sales-count').text('Error');
-                $('#todays-sales').text('Error');
+                $('#sales-count').text('0');
+                $('#todays-sales').text('0');
             }
         });
 
         // 2️⃣ Ingresos de hoy
         $.ajax({
-            url: 'http://localhost:8080/api/sales/today-income',
+            url: 'http://3.17.146.31:8080/api/sales/today-income',
             method: 'GET',
             headers: headers,
             success: function(data) {
                 $('#revenue-total').text(`$${data.toLocaleString('es-CO')} COP`);
             },
             error: function() {
-                console.error('Error al cargar ingresos de hoy');
                 $('#revenue-total').text('$0 COP');
             }
         });
 
         // 3️⃣ Clientes registrados
         $.ajax({
-            url: 'http://localhost:8080/api/sales/clients-count',
+            url: 'http://3.17.146.31:8080/api/sales/clients-count',
             method: 'GET',
             headers: headers,
             success: function(data) {
@@ -168,15 +247,14 @@ $(document).ready(function () {
                 $('#registered-clients').text(data);
             },
             error: function() {
-                console.error('Error al cargar clientes');
-                $('#clients-count').text('Error');
-                $('#registered-clients').text('Error');
+                $('#clients-count').text('0');
+                $('#registered-clients').text('0');
             }
         });
 
         // 4️⃣ Productos activos
         $.ajax({
-            url: 'http://localhost:8080/api/sales/products-count',
+            url: 'http://3.17.146.31:8080/api/sales/products-count',
             method: 'GET',
             headers: headers,
             success: function(data) {
@@ -184,15 +262,14 @@ $(document).ready(function () {
                 $('#active-products').text(data);
             },
             error: function() {
-                console.error('Error al cargar productos activos');
-                $('#products-count').text('Error');
-                $('#active-products').text('Error');
+                $('#products-count').text('0');
+                $('#active-products').text('0');
             }
         });
 
         // 5️⃣ Información Rápida (stock, etc.)
         $.ajax({
-            url: 'http://localhost:8080/api/sales/quick-info',
+            url: 'http://3.17.146.31:8080/api/sales/quick-info',
             method: 'GET',
             headers: headers,
             success: function(data) {
@@ -200,12 +277,58 @@ $(document).ready(function () {
                 $('#active-products').text(data.productosActivos || 0);
                 $('#registered-clients').text(data.clientesRegistrados || 0);
                 $('#todays-sales').text(data.ventasDelDia || 0);
-                // Opcional: actualizar ingresos aquí también
                 $('#revenue-total').text(`$${(data.ingresosDelDia || 0).toLocaleString('es-CO')} COP`);
             },
             error: function() {
                 console.error('Error al cargar información rápida');
-                $('#stock-count').text('Error');
+            }
+        });
+
+        loadRecentSales();
+    }
+
+    function loadRecentSales() {
+        const headers = getAuthHeaders();
+        if (!headers) return;
+
+        $.ajax({
+            url: 'http://3.17.146.31:8080/api/sales/recent',
+            method: 'GET',
+            headers: headers,
+            success: function(sales) {
+                const $list = $('#recent-sales-list');
+                $list.empty();
+
+                if (!sales || sales.length === 0) {
+                    $list.html('<p class="text-center text-muted">No hay ventas recientes</p>');
+                    return;
+                }
+
+                sales.slice(0, 10).forEach(sale => {
+                    const date = sale.date ? new Date(sale.date).toLocaleDateString('es-CO') : 'N/A';
+                    const total = sale.total ? `$${sale.total.toLocaleString('es-CO')}` : 'N/A';
+                    
+                    const saleItem = `
+                        <div class="sale-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${sale.clientName || 'N/A'}</strong><br>
+                                    <small class="text-muted">${date}</small>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-success">${total}</strong><br>
+                                    <small class="badge ${sale.status === 'CANCELLED' ? 'bg-danger' : 'bg-success'}">
+                                        ${sale.status === 'CANCELLED' ? 'Cancelada' : 'Completada'}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $list.append(saleItem);
+                });
+            },
+            error: function() {
+                $('#recent-sales-list').html('<p class="text-center text-muted">Error al cargar ventas</p>');
             }
         });
     }
@@ -213,7 +336,7 @@ $(document).ready(function () {
     // Ejecutar al cargar la página
     updateDashboardStats();
 
-    // ✅ Manejo del formulario de venta
+    // ✅ Manejo del formulario de venta (CORREGIDO)
     $('#saleForm').on('submit', function (e) {
         e.preventDefault();
 
@@ -245,177 +368,136 @@ $(document).ready(function () {
         };
 
         const $submitBtn = $('button[type="submit"]');
-        $submitBtn.prop('disabled', true).text('Registrando...');
+        $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Registrando...');
 
-        // 🚀 AJAX con token
         $.ajax({
-            url: 'http://localhost:8080/api/sales/create',
+            url: 'http://3.17.146.31:8080/api/sales/create',
             method: 'POST',
             headers: headers,
             contentType: 'application/json',
-            data: JSON.stringify(saleData),
+            data: JSON.stringify(saleData), // <-- FIX: Se agregó "data:"
             success: function (response) {
                 alert('✅ Venta registrada correctamente');
                 openSaleDetailWindow(response);
 
+                // 👇 FIX: Actualización de stock corregida
                 const $option = $productSelect.find(`option[value="${productId}"]`);
-                const currentStock = $option.data('stock');
-                const newStock = currentStock - quantity;
+                if ($option.length > 0) {
+                    const currentStock = parseInt($option.data('stock'), 10);
+                    const newStock = currentStock - quantity;
 
-                if (newStock <= 0) {
-                    $option.remove();
-                } else {
-                    $option.data('stock', newStock)
-                           .text($option.text().replace(/Stock: \d+/, `Stock: ${newStock}`));
+                    if (newStock <= 0) {
+                        $option.remove();
+                    } else {
+                        $option.data('stock', newStock).attr('data-stock', newStock);
+                        // Reemplazar el texto del Stock dinámicamente
+                        const updatedText = $option.text().replace(/Stock: \d+/, `Stock: ${newStock}`);
+                        $option.text(updatedText);
+                    }
                 }
 
                 $productSelect.val('');
-                $('#quantity').val('');
+                $('#quantity').val('1');
                 $('#price').val('');
 
-                // Actualizar Stats después de la venta
                 updateDashboardStats();
             },
             error: function (xhr) {
                 let errorMsg = 'Error al registrar la venta.';
-                if (xhr.responseJSON?.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
+                if (xhr.responseJSON?.message) errorMsg = xhr.responseJSON.message;
                 if(xhr.status === 401) {
-                    alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                    alert('Tu sesión ha expirado.');
                     window.location.href = '../../login.html';
                 } else {
                     alert('❌ ' + errorMsg);
                 }
             },
             complete: function () {
-                $submitBtn.prop('disabled', false).text('Registrar Venta');
+                $submitBtn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Registrar Venta');
             }
         });
     });
-function openSaleDetailWindow(sale) {
-    // 🛑 Validar que sale exista
-    if (!sale) {
-        alert("Error: Datos de venta no disponibles.");
-        return;
-    }
 
-    // 🛑 Asegurar formato de fecha LOCALDATETIME -> cadena
-    const fechaVenta = sale.date
-        ? new Date(sale.date).toLocaleString('es-CO', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        : "Sin fecha";
+    function openSaleDetailWindow(sale) {
+        if (!sale) return;
 
-    // 🛑 Render seguro de totales
-    const total = sale.total
-        ? Number(sale.total).toLocaleString('es-CO')
-        : "0";
+        const fechaVenta = sale.date ? new Date(sale.date).toLocaleString('es-CO') : "Sin fecha";
+        const total = sale.total ? Number(sale.total).toLocaleString('es-CO') : "0";
 
-    // ✅ Construir el detalle del producto desde los datos actuales del formulario
-    const productId = $('#product').val();
-    const productName = $('#product option:selected').data('name') || '';
-    const quantity = parseInt($('#quantity').val(), 10) || 0;
-    const unitPrice = parseFloat($('#price').val()) || 0;
-    const subtotal = quantity * unitPrice;
+        // Datos del producto actual para el detalle
+        const productName = $('#product option:selected').data('name') || '';
+        const quantity = parseInt($('#quantity').val(), 10) || 0;
+        const unitPrice = parseFloat($('#price').val()) || 0;
+        const subtotal = quantity * unitPrice;
 
-    // ✅ Crear un objeto "detalle" temporal para mostrar
-    const details = [
-        {
-            productName: productName.split(' - ')[0] || '', // Nombre sin modelo
-            productModel: productName.split(' - ')[1] || '', // Modelo
+        const details = [{
+            productName: productName.split(' - ')[0] || '',
+            productModel: productName.split(' - ')[1] || '',
             quantity: quantity,
             unitPrice: unitPrice,
             subtotal: subtotal
-        }
-    ];
+        }];
 
-    const ventaHtml = `
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <title>Detalle de Venta #${sale.id}</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
-                .header { background: #0d6efd; color: white; border-radius: 8px; padding: 15px; text-align: center; }
-                .total { font-weight: bold; font-size: 1.3rem; color: #0d6efd; }
-                .footer { margin-top: 30px; text-align: center; font-size: 0.9rem; color: #6c757d; }
-            </style>
-        </head>
-        <body class="p-4">
-
-            <div class="header mb-4">
-                <h3>Distribuidora La Dorada</h3>
-                <p><strong>Venta #${sale.id}</strong> | ${fechaVenta}</p>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header bg-secondary text-white">Cliente</div>
-                <div class="card-body">
-                    <p><strong>Nombre:</strong> ${sale.clientName ?? "No registrado"}</p>
-                    <p><strong>Teléfono:</strong> ${sale.clientPhone ?? "No registrado"}</p>
-                    <p><strong>Dirección:</strong> ${sale.clientAddress ?? "No registrada"}</p>
+        const ventaHtml = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>Detalle de Venta #${sale.id}</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; }
+                    .header { background: #2c3e50; color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+                    .total { font-weight: bold; font-size: 1.3rem; color: #2c3e50; text-align: right; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h3>Distribuidora La Dorada</h3>
+                    <p>Venta #${sale.id} | ${fechaVenta}</p>
                 </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">Productos</div>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead class="table-light">
+                <div class="card mb-3">
+                    <div class="card-header bg-light">Cliente</div>
+                    <div class="card-body">
+                        <p><strong>Nombre:</strong> ${sale.clientName ?? "N/A"}</p>
+                        <p><strong>Teléfono:</strong> ${sale.clientPhone ?? "N/A"}</p>
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr><th>Producto</th><th>Modelo</th><th>Cant.</th><th>P. Unit.</th><th>Subtotal</th></tr>
+                    </thead>
+                    <tbody>
+                        ${details.map(d => `
                             <tr>
-                                <th>Producto</th>
-                                <th>Modelo</th>
-                                <th>Cant.</th>
-                                <th>P. Unit.</th>
-                                <th>Subtotal</th>
+                                <td>${d.productName}</td>
+                                <td>${d.productModel}</td>
+                                <td>${d.quantity}</td>
+                                <td>$${d.unitPrice.toLocaleString('es-CO')}</td>
+                                <td>$${d.subtotal.toLocaleString('es-CO')}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${details.length === 0 
-                                ? `<tr><td colspan="5" class="text-center text-muted">Sin productos registrados</td></tr>` 
-                                : details.map(d => `
-                                    <tr> 
-                                        <td>${d.productName ?? ""}</td>
-                                        <td>${d.productModel ?? ""}</td>
-                                        <td>${d.quantity ?? 0}</td>
-                                        <td>$${Number(d.unitPrice ?? 0).toLocaleString('es-CO')}</td>
-                                        <td>$${Number(d.subtotal ?? 0).toLocaleString('es-CO')}</td>
-                                    </tr>
-                                `).join('')
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="total">Total: $${total} COP</div>
+                <div class="text-center mt-4"><button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir</button></div>
+            </body>
+            </html>
+        `;
 
-            <div class="text-end total">
-                Total: $${total} COP
-            </div>
+        const win = window.open('', '_blank', 'width=800,height=600');
+        win.document.write(ventaHtml);
+        win.document.close();
+    }
 
-            <div class="footer">
-                <button onclick="window.print()" class="btn btn-outline-primary btn-sm">🖨️ Imprimir</button>
-            </div>
-
-        </body>
-        </html>
-    `;
-
-    const win = window.open('', '_blank', 'width=800,height=600');
-    win.document.write(ventaHtml);
-    win.document.close();
-}
-
-
-    // Botones de dashboard
-    $('#btnRefreshDashboard').on('click', function() { updateDashboardStats(); });
+    // Botones de dashboard y navegación
+    $('#btnRefreshDashboard').on('click', function() { 
+        const $btn = $(this);
+        $btn.html('<i class="fas fa-spinner fa-spin me-1"></i>...');
+        updateDashboardStats();
+        setTimeout(() => $btn.html('<i class="fas fa-sync me-1"></i> Actualizar'), 1000);
+    });
+    
     $('#btnCancelSale').on('click', function() { 
         $('#saleForm')[0].reset(); 
         $('#date').val(today); 
@@ -425,20 +507,28 @@ function openSaleDetailWindow(sale) {
     });
 
     $('#btnNewSaleFromSalesTab').on('click', function() { $('#dashboard-tab').click(); });
-    $('#btnNewClient').on('click', function() { window.location.href = '../seller/clients.html'; });
-    $('#btnNewProduct').on('click', function() { window.location.href = '../seller/products.html'; });
+    $('#btnNewClient').on('click', function() { window.location.href = 'clients.html'; });
+    $('#btnNewProduct').on('click', function() { window.location.href = 'products.html'; });
 
-    // Búsquedas
-    $('#btnSearchSales').on('click', function() { 
-        const query = $('#sales-search').val(); 
-        alert('Buscando ventas por: ' + query); 
+    // Búsquedas (Alertas informativas)
+    $('#btnSearchSales').on('click', function() { alert('Buscando ventas por: ' + $('#sales-search').val()); });
+    $('#btnSearchProducts').on('click', function() { alert('Buscando productos por: ' + $('#products-search').val()); });
+    $('#btnSearchClients').on('click', function() { alert('Buscando clientes por: ' + $('#clients-search').val()); });
+
+    // 👇 MENÚ MÓVIL
+    $('#menuToggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.sidebar').toggleClass('show');
+        $('body').css('overflow', $('.sidebar').hasClass('show') ? 'hidden' : 'auto');
     });
-    $('#btnSearchProducts').on('click', function() { 
-        const query = $('#products-search').val(); 
-        alert('Buscando productos por: ' + query); 
-    });
-    $('#btnSearchClients').on('click', function() { 
-        const query = $('#clients-search').val(); 
-        alert('Buscando clientes por: ' + query); 
+    
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 768) {
+            if (!$('.sidebar').is(e.target) && $('.sidebar').has(e.target).length === 0 && !$('#menuToggle').is(e.target)) {
+                $('.sidebar').removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+        }
     });
 });

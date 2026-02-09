@@ -1,6 +1,67 @@
-// js/admin/clients.js
 $(document).ready(function () {
     console.log("✅ clients.js cargado");
+
+    // 🔧 FUNCIÓN PARA ACTUALIZAR SIDEBAR SEGÚN PÁGINA ACTUAL
+    function updateSidebarActiveItem() {
+        const currentPath = window.location.pathname;
+        console.log("📍 Ruta actual:", currentPath);
+        
+        $('.sidebar .nav-link').removeClass('active');
+        $('.sidebar .nav-item').removeClass('active');
+        
+        if (currentPath.includes('dashboard.html')) {
+            $('#sidebarDashboard').addClass('active');
+            console.log("✅ Sidebar: Dashboard activo");
+        } else if (currentPath.includes('products.html')) {
+            $('#sidebarProducts').addClass('active');
+            console.log("✅ Sidebar: Productos activo");
+        } else if (currentPath.includes('clients.html')) {
+            $('#sidebarClients').addClass('active');
+            console.log("✅ Sidebar: Clientes activo");
+        } else if (currentPath.includes('sales.html')) {
+            $('#sidebarSales').addClass('active');
+            console.log("✅ Sidebar: Ventas activo");
+        } else if (currentPath.includes('stock.html')) {
+            $('#sidebarStock').addClass('active');
+            console.log("✅ Sidebar: Inventario activo");
+        } else if (currentPath.includes('settings.html')) {
+            $('#sidebarSettings').addClass('active');
+            console.log("✅ Sidebar: Configuración activo");
+        }
+    }
+
+    // 🔧 ESPERAR A QUE EL SIDEBAR CARGUE COMPLETAMENTE
+    function waitForSidebar(callback) {
+        let attempts = 0;
+        const maxAttempts = 50;
+        const checkInterval = setInterval(() => {
+            if ($('#sidebarClients').length > 0) {
+                clearInterval(checkInterval);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.warn("⚠️ Sidebar no cargó después de 5 segundos");
+                callback();
+            }
+            attempts++;
+        }, 100);
+    }
+
+    // 🔧 Función para ajustar responsive
+    function adjustResponsive() {
+        const width = $(window).width();
+        
+        if (width < 768) {
+            $('#clientsTable').addClass('table-responsive');
+            $('.card-body').css('padding', '10px');
+            $('.main-content').css('padding', '10px');
+            $('body').css('overflow-y', 'auto');
+        } else {
+            $('#clientsTable').removeClass('table-responsive');
+            $('.card-body').css('padding', '20px');
+            $('.main-content').css('padding', '20px');
+        }
+    }
 
     // 🔑 Función para obtener headers de autenticación
     function getAuthHeaders() {
@@ -20,6 +81,16 @@ $(document).ready(function () {
     const authHeaders = getAuthHeaders();
     if (!authHeaders) return;
 
+    // Ajustar responsive al cargar y al redimensionar
+    adjustResponsive();
+    $(window).on('resize', adjustResponsive);
+
+    // Ejecutar después de que sidebar cargue
+    waitForSidebar(() => {
+        updateSidebarActiveItem();
+        console.log("✅ Sidebar cargado y actualizado");
+    });
+
     initEvents();
     fetchClients();
 
@@ -29,7 +100,6 @@ $(document).ready(function () {
         $('#clientsTable').on('click', '.btnEdit', editOrSaveClient);
         $('#clientsTable').on('click', '.btnDelete', deleteClient);
         $('#clientsTable').on('click', '.btnGenerateSale', generateSaleFromClient);
-
         $('#btnSearchClient').on('click', searchClient);
         $('#btnLogout').on('click', logout);
         $('#btnExport').on('click', exportClients);
@@ -38,7 +108,7 @@ $(document).ready(function () {
     // Obtener clientes
     function fetchClients() {
         $.ajax({
-            url: 'http://localhost:8080/api/clients/all',
+            url: 'http://3.17.146.31:8080/api/clients/all',
             method: 'GET',
             headers: authHeaders,
             success: renderClients,
@@ -75,9 +145,9 @@ $(document).ready(function () {
                     <td class="editable" data-field="type">${client.type || ''}</td>
                     <td>${client.registerDate || ''}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm btnEdit">Edit</button>
-                        <button class="btn btn-danger btn-sm btnDelete">Delete</button>
-                        <button class="btn btn-success btn-sm btnGenerateSale">Generar venta</button>
+                        <button class="btn btn-warning btn-sm btnEdit"><i class="fas fa-edit me-1"></i>Edit</button>
+                        <button class="btn btn-danger btn-sm btnDelete"><i class="fas fa-trash me-1"></i>Delete</button>
+                        <button class="btn btn-success btn-sm btnGenerateSale"><i class="fas fa-shopping-cart me-1"></i>Venta</button>
                     </td>
                 </tr>`;
             tbody.append(row);
@@ -101,13 +171,13 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: 'http://localhost:8080/api/clients',
+            url: 'http://3.17.146.31:8080/api/clients',
             method: 'POST',
             headers: authHeaders,
             contentType: 'application/json',
-             DATA : JSON.stringify(client),
+            data: JSON.stringify(client), // ✅ CORREGIDO: "data" en minúscula
             success: function () {
-                alert('Cliente creado correctamente');
+                alert('✅ Cliente creado correctamente');
                 fetchClients();
 
                 $('#clienteName, #clienteAddress, #clientePhone, #clienteEmail, #clienteType, #clienteRegisterDate').val('');
@@ -147,9 +217,9 @@ $(document).ready(function () {
             });
 
             row.find('td').last().html(`
-                <button class="btn btn-success btn-sm btnEdit">Guardar</button>
-                <button class="btn btn-danger btn-sm btnDelete">Delete</button>
-                <button class="btn btn-primary btn-sm btnGenerateSale">Generar venta</button>
+                <button class="btn btn-success btn-sm btnEdit"><i class="fas fa-save me-1"></i>Guardar</button>
+                <button class="btn btn-danger btn-sm btnDelete"><i class="fas fa-trash me-1"></i>Delete</button>
+                <button class="btn btn-primary btn-sm btnGenerateSale"><i class="fas fa-shopping-cart me-1"></i>Generar venta</button>
             `);
 
             row.attr('data-editing', 'true');
@@ -169,13 +239,13 @@ $(document).ready(function () {
             const updatedClient = { id, name, address, phone, email, type };
 
             $.ajax({
-                url: `http://localhost:8080/api/clients/${id}`,
+                url: `http://3.17.146.31:8080/api/clients/${id}`,
                 method: 'PUT',
                 headers: authHeaders,
                 contentType: 'application/json',
-                DATA : JSON.stringify(updatedClient),
+                data: JSON.stringify(updatedClient), // ✅ CORREGIDO: "data" en minúscula
                 success: function () {
-                    alert("Cliente actualizado correctamente");
+                    alert("✅ Cliente actualizado correctamente");
 
                     row.find('[data-field="name"]').text(name);
                     row.find('[data-field="address"]').text(address);
@@ -184,9 +254,9 @@ $(document).ready(function () {
                     row.find('[data-field="type"]').text(type === 'CASH' ? 'Contado' : 'Crédito');
 
                     row.find('td').last().html(`
-                        <button class="btn btn-warning btn-sm btnEdit">Edit</button>
-                        <button class="btn btn-danger btn-sm btnDelete">Delete</button>
-                        <button class="btn btn-success btn-sm btnGenerateSale">Generar venta</button>
+                        <button class="btn btn-warning btn-sm btnEdit"><i class="fas fa-edit me-1"></i>Edit</button>
+                        <button class="btn btn-danger btn-sm btnDelete"><i class="fas fa-trash me-1"></i>Delete</button>
+                        <button class="btn btn-success btn-sm btnGenerateSale"><i class="fas fa-shopping-cart me-1"></i>Venta</button>
                     `);
 
                     row.attr('data-editing', 'false');
@@ -197,7 +267,7 @@ $(document).ready(function () {
                         alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
                         window.location.href = '../../login.html';
                     } else {
-                        alert("Hubo un error al actualizar el cliente");
+                        alert("❌ Hubo un error al actualizar el cliente");
                     }
                 }
             });
@@ -219,12 +289,12 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: `http://localhost:8080/api/clients/${id}`,
+            url: `http://3.17.146.31:8080/api/clients/${id}`,
             method: 'DELETE',
             headers: authHeaders,
             success: function () {
                 row.remove();
-                alert('Cliente eliminado correctamente');
+                alert('✅ Cliente eliminado correctamente');
             },
             error: function (xhr) {
                 console.error("Error al eliminar cliente:", xhr);
@@ -232,7 +302,7 @@ $(document).ready(function () {
                     alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
                     window.location.href = '../../login.html';
                 } else {
-                    alert('Error al eliminar el cliente');
+                    alert('❌ Error al eliminar el cliente');
                 }
             }
         });
@@ -246,7 +316,7 @@ $(document).ready(function () {
             return;
         }
         $.ajax({
-            url: `http://localhost:8080/api/clients/search?query=${query}`,
+            url: `http://3.17.146.31:8080/api/clients/search?query=${query}`,
             method: 'GET',
             headers: authHeaders,
             success: renderClients,
@@ -277,26 +347,91 @@ $(document).ready(function () {
     // Generar venta desde cliente
     function generateSaleFromClient(e) {
         e.stopPropagation();
+        e.preventDefault();
 
         const row = $(this).closest('tr');
 
         if (row.attr('data-editing') === 'true') {
-            row.attr('data-editing', 'false');
+            row.find('.btnEdit').click();
         }
 
         const clientData = {
             id: row.data('id'),
-            name: row.find('td').eq(1).text().trim(),
-            address: row.find('td').eq(2).text().trim(),
-            phone: row.find('td').eq(3).text().trim(),
-            email: row.find('td').eq(4).text().trim(),
-            type: row.find('td').eq(5).text().trim(),
+            name: row.find('[data-field="name"]').text().trim(),
+            address: row.find('[data-field="address"]').text().trim(),
+            phone: row.find('[data-field="phone"]').text().trim(),
+            email: row.find('[data-field="email"]').text().trim(),
+            type: row.find('[data-field="type"]').text().trim(),
             registerDate: row.find('td').eq(6).text().trim()
         };
 
-        localStorage.setItem('selectedClient', JSON.stringify(clientData));
+        if (!clientData.id || !clientData.name || !clientData.phone) {
+            alert('❌ Datos del cliente incompletos');
+            return;
+        }
 
-        // 👉 Redirigir a la vista de ventas del admin
+        localStorage.setItem('selectedClient', JSON.stringify(clientData));
+        console.log("✅ Cliente guardado para venta:", clientData);
+
         window.location.href = "../../view/admin/sales.html";
     }
+
+    // 👇 BOTÓN MENÚ PARA MÓVIL - ADMIN
+    $('#menuToggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.sidebar').toggleClass('show');
+        if ($('.sidebar').hasClass('show')) {
+            $('body').css('overflow', 'hidden');
+        } else {
+            $('body').css('overflow', 'auto');
+        }
+    });
+    
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 768) {
+            if (!$('.sidebar').is(e.target) && 
+                $('.sidebar').has(e.target).length === 0 && 
+                !$('#menuToggle').is(e.target)) {
+                $('.sidebar').removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+        }
+    });
+    
+    $('.sidebar').on('touchmove', function(e) {
+        e.stopPropagation();
+    });
+    
+    // 👇 FIX: Asegurar que la tabla sea siempre scrollable horizontalmente
+    function adjustTableResponsive() {
+        if ($(window).width() < 768) {
+            $('#clientsTableContainer').css({
+                'overflow-x': 'auto',
+                'overflow-y': 'auto'
+            });
+            $('#clientsTable').css('min-width', '100%');
+        } else {
+            $('#clientsTableContainer').css({
+                'overflow-x': 'hidden',
+                'overflow-y': 'auto'
+            });
+            $('#clientsTable').css('min-width', 'auto');
+        }
+    }
+
+    adjustTableResponsive();
+    $(window).on('resize', adjustTableResponsive);
+    
+    $('#clientsTableContainer').on('scroll', function() {
+        if ($(window).width() < 768) {
+            $('footer').css('position', 'static');
+        }
+    });
+    
+    setTimeout(function() {
+        if ($(window).width() < 768) {
+            $('#clientsTableContainer').scrollLeft(0);
+        }
+    }, 100);
 });

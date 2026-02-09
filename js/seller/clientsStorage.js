@@ -1,11 +1,21 @@
-// Archivo para manejar el almacenamiento de clientes en el navegador
+/**
+ * ClientStorage - Clase para manejar el almacenamiento de clientes en el navegador
+ * @version 1.0.0
+ * @author Distribuidora La Dorada
+ */
 class ClientStorage {
+    /**
+     * Constructor de la clase
+     */
     constructor() {
         this.storageKey = 'clients_list';
         this.clients = this.loadClients();
     }
 
-    // Cargar clientes desde localStorage
+    /**
+     * Cargar clientes desde localStorage
+     * @returns {Array} Array de clientes
+     */
     loadClients() {
         try {
             const stored = localStorage.getItem(this.storageKey);
@@ -16,7 +26,9 @@ class ClientStorage {
         }
     }
 
-    // Guardar clientes en localStorage
+    /**
+     * Guardar clientes en localStorage
+     */
     saveClients() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(this.clients));
@@ -25,7 +37,12 @@ class ClientStorage {
         }
     }
 
-    // Agregar cliente
+    /**
+     * Agregar cliente
+     * @param {Object} client - Objeto cliente
+     * @returns {Object} Cliente agregado
+     * @throws {Error} Si falta nombre o teléfono
+     */
     addClient(client) {
         // Validar que el cliente tenga los campos obligatorios
         if (!client.name || !client.phone) {
@@ -53,25 +70,41 @@ class ClientStorage {
         return client;
     }
 
-    // Generar ID único para el cliente
+    /**
+     * Generar ID único para el cliente
+     * @returns {String} ID único
+     */
     generateUniqueId() {
         const timestamp = Date.now().toString(36);
         const random = Math.random().toString(36).substr(2, 5);
         return `client_${timestamp}_${random}`;
     }
 
-    // Obtener todos los clientes
+    /**
+     * Obtener todos los clientes
+     * @returns {Array} Copia del array de clientes
+     */
     getAllClients() {
         return [...this.clients]; // Devolver copia para evitar mutaciones externas
     }
 
-    // Obtener cliente por ID
+    /**
+     * Obtener cliente por ID
+     * @param {String|Number} id - ID del cliente
+     * @returns {Object|null} Cliente o null si no existe
+     */
     getClientById(id) {
         const client = this.clients.find(client => client.id === id);
         return client ? { ...client } : null; // Devolver copia
     }
 
-    // Actualizar cliente
+    /**
+     * Actualizar cliente
+     * @param {String|Number} id - ID del cliente
+     * @param {Object} updatedClient - Datos actualizados
+     * @returns {Object|null} Cliente actualizado o null si no existe
+     * @throws {Error} Si falta nombre o teléfono
+     */
     updateClient(id, updatedClient) {
         const index = this.clients.findIndex(client => client.id === id);
         if (index !== -1) {
@@ -92,7 +125,11 @@ class ClientStorage {
         return null;
     }
 
-    // Eliminar cliente
+    /**
+     * Eliminar cliente
+     * @param {String|Number} id - ID del cliente
+     * @returns {Boolean} true si se eliminó, false si no existe
+     */
     deleteClient(id) {
         const initialLength = this.clients.length;
         this.clients = this.clients.filter(client => client.id !== id);
@@ -103,12 +140,20 @@ class ClientStorage {
         return false;
     }
 
-    // Obtener últimos clientes (por defecto 10)
+    /**
+     * Obtener últimos clientes
+     * @param {Number} count - Cantidad de clientes (por defecto 10)
+     * @returns {Array} Array de clientes
+     */
     getLastClients(count = 10) {
         return [...this.clients.slice(-count)]; // Devolver copia
     }
 
-    // Buscar clientes por término
+    /**
+     * Buscar clientes por término
+     * @param {String} query - Término de búsqueda
+     * @returns {Array} Array de clientes que coinciden
+     */
     searchClients(query) {
         if (!query || query.trim() === '') {
             return this.getAllClients();
@@ -123,36 +168,56 @@ class ClientStorage {
         ).map(client => ({ ...client })); // Devolver copias
     }
 
-    // Obtener cantidad total de clientes
+    /**
+     * Obtener cantidad total de clientes
+     * @returns {Number} Cantidad de clientes
+     */
     getClientCount() {
         return this.clients.length;
     }
 
-    // Limpiar todos los clientes (útil para pruebas o logout)
+    /**
+     * Limpiar todos los clientes
+     */
     clearAllClients() {
         this.clients = [];
         this.saveClients();
     }
 
-    // Verificar si existe un cliente con el mismo teléfono
+    /**
+     * Verificar si existe un cliente con el mismo teléfono
+     * @param {String} phone - Teléfono a verificar
+     * @returns {Boolean} true si existe, false si no
+     */
     clientExistsByPhone(phone) {
         return this.clients.some(client => client.phone === phone);
     }
 
-    // Verificar si existe un cliente con el mismo email
+    /**
+     * Verificar si existe un cliente con el mismo email
+     * @param {String} email - Email a verificar
+     * @returns {Boolean} true si existe, false si no
+     */
     clientExistsByEmail(email) {
         if (!email) return false;
         return this.clients.some(client => client.email === email);
     }
 
-    // Obtener clientes por tipo (CASH o CREDIT)
+    /**
+     * Obtener clientes por tipo
+     * @param {String} type - Tipo de cliente (CASH o CREDIT)
+     * @returns {Array} Array de clientes
+     */
     getClientsByType(type) {
         return this.clients
             .filter(client => client.type === type)
             .map(client => ({ ...client })); // Devolver copias
     }
 
-    // Obtener estadísticas básicas
+    /**
+     * Obtener estadísticas básicas
+     * @returns {Object} Objeto con estadísticas
+     */
     getStats() {
         const total = this.clients.length;
         const cashClients = this.clients.filter(c => c.type === 'CASH').length;
@@ -170,3 +235,8 @@ class ClientStorage {
 
 // Instancia global para usar en otros archivos
 const clientStorage = new ClientStorage();
+
+// Exportar para uso en módulos (opcional)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ClientStorage;
+}

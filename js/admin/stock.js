@@ -1,6 +1,69 @@
 $(document).ready(function () {
     console.log("✅ stock.js cargado");
 
+    // 🔧 FUNCIÓN PARA ACTUALIZAR SIDEBAR SEGÚN PÁGINA ACTUAL
+    function updateSidebarActiveItem() {
+        const currentPath = window.location.pathname;
+        console.log("📍 Ruta actual:", currentPath);
+        
+        $('.sidebar .nav-link').removeClass('active');
+        $('.sidebar .nav-item').removeClass('active');
+        
+        if (currentPath.includes('dashboard.html')) {
+            $('#sidebarDashboard').addClass('active');
+            console.log("✅ Sidebar: Dashboard activo");
+        } else if (currentPath.includes('products.html')) {
+            $('#sidebarProducts').addClass('active');
+            console.log("✅ Sidebar: Productos activo");
+        } else if (currentPath.includes('clients.html')) {
+            $('#sidebarClients').addClass('active');
+            console.log("✅ Sidebar: Clientes activo");
+        } else if (currentPath.includes('sales.html')) {
+            $('#sidebarSales').addClass('active');
+            console.log("✅ Sidebar: Ventas activo");
+        } else if (currentPath.includes('stock.html')) {
+            $('#sidebarStock').addClass('active');
+            console.log("✅ Sidebar: Inventario activo");
+        } else if (currentPath.includes('settings.html')) {
+            $('#sidebarSettings').addClass('active');
+            console.log("✅ Sidebar: Configuración activo");
+        } else if (currentPath.includes('reports.html')) {
+            $('#sidebarReports').addClass('active');
+            console.log("✅ Sidebar: Reportes activo");
+        }
+    }
+
+    // 🔧 ESPERAR A QUE EL SIDEBAR CARGUE COMPLETAMENTE
+    function waitForSidebar(callback) {
+        let attempts = 0;
+        const maxAttempts = 50;
+        const checkInterval = setInterval(() => {
+            if ($('#sidebarStock').length > 0) {
+                clearInterval(checkInterval);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.warn("⚠️ Sidebar no cargó después de 5 segundos");
+                callback();
+            }
+            attempts++;
+        }, 100);
+    }
+
+    // 🔧 Función para ajustar responsive
+    function adjustResponsive() {
+        const width = $(window).width();
+        
+        if (width < 768) {
+            $('.card-body').css('padding', '10px');
+            $('.main-content').css('padding', '10px');
+            $('body').css('overflow-y', 'auto');
+        } else {
+            $('.card-body').css('padding', '20px');
+            $('.main-content').css('padding', '20px');
+        }
+    }
+
     // 🔑 Verificar autenticación
     function getAuthHeaders() {
         const token = localStorage.getItem('authToken');
@@ -20,6 +83,16 @@ $(document).ready(function () {
 
     const $tbody = $('#stockTableBody');
 
+    // Ajustar responsive al cargar y al redimensionar
+    adjustResponsive();
+    $(window).on('resize', adjustResponsive);
+
+    // Ejecutar después de que sidebar cargue
+    waitForSidebar(() => {
+        updateSidebarActiveItem();
+        console.log("✅ Sidebar cargado y actualizado");
+    });
+
     // Función para cargar y agrupar stock
     function loadStock() {
         $tbody.empty().append(`
@@ -35,7 +108,7 @@ $(document).ready(function () {
         if (!headers) return;
 
         $.ajax({
-            url: 'http://localhost:8080/api/products/with-stock',
+            url: 'http://3.17.146.31:8080/api/products/with-stock',
             type: 'GET',
             headers: headers,
             success: function (products) {
@@ -51,7 +124,6 @@ $(document).ready(function () {
                     return;
                 }
 
-                // 🔹 Agrupar por combinación (nombre + modelo)
                 const grouped = {};
                 products.forEach(p => {
                     const key = `${p.name}__${p.model}`;
@@ -66,7 +138,6 @@ $(document).ready(function () {
                     grouped[key].totalStock += p.currentStock;
                 });
 
-                // 🔹 Mostrar cada combinación única
                 Object.values(grouped).forEach(item => {
                     $tbody.append(`
                         <tr>
@@ -98,7 +169,6 @@ $(document).ready(function () {
         });
     }
 
-    // Función de escape HTML
     function escapeHtml(text) {
         if (typeof text !== 'string') return '';
         const div = document.createElement('div');
@@ -119,7 +189,7 @@ $(document).ready(function () {
         localStorage.removeItem('user');
         if (token) {
             $.ajax({
-                url: 'http://localhost:8080/api/api/auth/logout',
+                url: 'http://3.17.146.31:8080/api/api/auth/logout',
                 type: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             }).always(() => {
@@ -129,4 +199,63 @@ $(document).ready(function () {
             window.location.href = '/login.html';
         }
     };
+
+    // 👇 BOTÓN MENÚ PARA MÓVIL - ADMIN
+    $('#menuToggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.sidebar').toggleClass('show');
+        if ($('.sidebar').hasClass('show')) {
+            $('body').css('overflow', 'hidden');
+        } else {
+            $('body').css('overflow', 'auto');
+        }
+    });
+    
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 768) {
+            if (!$('.sidebar').is(e.target) && 
+                $('.sidebar').has(e.target).length === 0 && 
+                !$('#menuToggle').is(e.target)) {
+                $('.sidebar').removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+        }
+    });
+    
+    $('.sidebar').on('touchmove', function(e) {
+        e.stopPropagation();
+    });
+    
+    // 👇 FIX: Asegurar que la tabla sea scrollable en móvil
+    function adjustTableResponsive() {
+        if ($(window).width() < 768) {
+            $('#stockTableContainer').css({
+                'overflow-x': 'auto',
+                'overflow-y': 'auto'
+            });
+            $('#stockTable').css('min-width', '100%');
+        } else {
+            $('#stockTableContainer').css({
+                'overflow-x': 'hidden',
+                'overflow-y': 'auto'
+            });
+            $('#stockTable').css('min-width', 'auto');
+        }
+    }
+
+    adjustTableResponsive();
+    $(window).on('resize', adjustTableResponsive);
+    
+    $('#stockTableContainer').on('scroll', function() {
+        if ($(window).width() < 768) {
+            $('footer').css('position', 'static');
+        }
+    });
+    
+    setTimeout(function() {
+        if ($(window).width() < 768) {
+            $('#stockTableContainer').scrollLeft(0);
+        }
+    }, 100);
 });

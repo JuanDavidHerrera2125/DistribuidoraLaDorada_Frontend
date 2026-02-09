@@ -28,6 +28,11 @@
   </style>
 </head>
 <body>
+  <!-- 👇 BOTÓN DE MENÚ PARA MÓVIL (AGREGADO) -->
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
   <!-- Contenedor principal con flex para sticky footer -->
   <div class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1">
@@ -95,5 +100,56 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="../../js/admin/stock.js"></script>
+  
+  <!-- 👇 SCRIPT DE TOGGLE PARA SIDEBAR - CORREGIDO -->
+<script>
+  // Función para inicializar el sidebar toggle
+  function initSidebarToggle() {
+    // Solo si el botón de menú existe
+    if ($('#menuToggle').length > 0 && $('.sidebar').length > 0) {
+      // Toggle sidebar en móvil
+      $('#menuToggle').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.sidebar').toggleClass('show');
+        if ($('.sidebar').hasClass('show')) {
+          $('body').css('overflow', 'hidden');
+        } else {
+          $('body').css('overflow', 'auto');
+        }
+      });
+      
+      // Cerrar sidebar al hacer clic fuera en móvil
+      $(document).off('click.sidebar').on('click.sidebar', function(e) {
+        if ($(window).width() <= 768) {
+          if (!$('.sidebar').is(e.target) && 
+              $('.sidebar').has(e.target).length === 0 && 
+              !$('#menuToggle').is(e.target)) {
+            $('.sidebar').removeClass('show');
+            $('body').css('overflow', 'auto');
+          }
+        }
+      });
+      
+      // Prevenir que el sidebar bloquee el scroll
+      $('.sidebar').off('touchmove').on('touchmove', function(e) {
+        e.stopPropagation();
+      });
+    }
+  }
+
+  // Inicializar cuando el documento esté listo
+  $(document).ready(function() {
+    // Esperar a que el sidebar se cargue (si se carga dinámicamente)
+    if ($('#sidebar').length > 0 && $('#sidebar').html().trim() === '') {
+      $('#sidebar').on('load', initSidebarToggle);
+    } else {
+      initSidebarToggle();
+    }
+  });
+
+  // Si el sidebar se carga mediante AJAX, inicializar después
+  $(document).on('sidebarLoaded', initSidebarToggle);
+</script>
 </body>
 </html>

@@ -1,6 +1,67 @@
-// js/seller/sales.js
 $(document).ready(function () {
     console.log("✅ sales.js cargado");
+
+    // 🔧 FUNCIÓN PARA ACTUALIZAR SIDEBAR SEGÚN PÁGINA ACTUAL
+    function updateSidebarActiveItem() {
+        const currentPath = window.location.pathname;
+        console.log("📍 Ruta actual:", currentPath);
+        
+        $('.sidebar .nav-link').removeClass('active');
+        $('.sidebar .nav-item').removeClass('active');
+        
+        if (currentPath.includes('clients.html')) {
+            $('#sidebarClients').addClass('active');
+            console.log("✅ Sidebar: Clientes activo");
+        } else if (currentPath.includes('salesDashboard.html')) {
+            $('#sidebarDashboard').addClass('active');
+            console.log("✅ Sidebar: Dashboard activo");
+        } else if (currentPath.includes('sales.html')) {
+            $('#sidebarSales').addClass('active');
+            console.log("✅ Sidebar: Ventas activo");
+        } else if (currentPath.includes('products.html')) {
+            $('#sidebarProducts').addClass('active');
+            console.log("✅ Sidebar: Productos activo");
+        } else if (currentPath.includes('reports.html')) {
+            $('#sidebarReports').addClass('active');
+            console.log("✅ Sidebar: Reportes activo");
+        }
+    }
+
+    // 🔧 ESPERAR A QUE EL SIDEBAR CARGUE COMPLETAMENTE
+    function waitForSidebar(callback) {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 segundos máximo
+        const checkInterval = setInterval(() => {
+            // Verificar si el sidebar tiene los elementos necesarios
+            if ($('#sidebarSales').length > 0 || $('#sidebarClients').length > 0) {
+                clearInterval(checkInterval);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.warn("⚠️ Sidebar no cargó después de 5 segundos");
+                callback(); // Ejecutar de todos modos
+            }
+            attempts++;
+        }, 100);
+    }
+
+    // 🔧 Función para ajustar responsive
+    function adjustResponsive() {
+        const width = $(window).width();
+        
+        if (width < 768) {
+            // Móvil: ajustar tabla
+            $('#salesTable').addClass('table-responsive');
+            $('.card-body').css('padding', '10px');
+            $('.filter-section').addClass('flex-column');
+            $('.filter-section .form-group').css('margin-bottom', '10px');
+        } else {
+            $('#salesTable').removeClass('table-responsive');
+            $('.card-body').css('padding', '20px');
+            $('.filter-section').removeClass('flex-column');
+            $('.filter-section .form-group').css('margin-bottom', '0');
+        }
+    }
 
     // 🔑 Función para obtener headers de autenticación
     function getAuthHeaders() {
@@ -41,7 +102,7 @@ $(document).ready(function () {
     // Cargar ventas
     function loadSales() {
         $.ajax({
-            url: 'http://localhost:8080/api/sales',
+            url: 'http://3.17.146.31:8080/api/sales',
             type: 'GET',
             headers: authHeaders,
             success: function (sales) {
@@ -160,4 +221,30 @@ $(document).ready(function () {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // Ejecutar después de que sidebar cargue
+    waitForSidebar(() => {
+        updateSidebarActiveItem();
+        console.log("✅ Sidebar cargado y actualizado");
+    });
+
+    adjustResponsive();
+    $(window).on('resize', adjustResponsive);
+
+    // 👇 BOTÓN MENÚ PARA MÓVIL - NUEVO
+    // Toggle sidebar en móvil
+    $('#menuToggle').on('click', function() {
+        $('.sidebar').toggleClass('show');
+    });
+    
+    // Cerrar sidebar al hacer clic fuera de él en móvil
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 768) {
+            if (!$('.sidebar').is(e.target) && 
+                $('.sidebar').has(e.target).length === 0 && 
+                !$('#menuToggle').is(e.target)) {
+                $('.sidebar').removeClass('show');
+            }
+        }
+    });
 });

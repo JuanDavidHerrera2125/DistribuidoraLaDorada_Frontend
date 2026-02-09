@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = localStorage.getItem('authToken');
         if (!token) {
             alert('Debes iniciar sesión para acceder a esta página');
-            window.location.href = '/login.html';
+            window.location.href = '../login.html';
             return null;
         }
         return {
@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar autenticación al cargar la página
     const authHeaders = getAuthHeaders();
     if (!authHeaders) return;
+
+    // ✅ USAR LA VARIABLE GLOBAL API_URL (debe estar definida en auth.js o config.js)
+    const BASE_URL = typeof API_URL !== 'undefined' ? API_URL : 'http://3.17.146.31:8080';
+    const USERS_ENDPOINT = `${BASE_URL}/api/users`;
+
+    console.log('📡 API_URL:', BASE_URL);
+    console.log('📡 USERS_ENDPOINT:', USERS_ENDPOINT);
 
     const form = document.getElementById('userForm');
     const messageDiv = document.getElementById('message');
@@ -45,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         messageDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creando usuario...';
 
         try {
-            const response = await fetch('http://localhost:8080/api/users', {
+            const response = await fetch(USERS_ENDPOINT, {
                 method: 'POST',
                 headers: authHeaders,
                 body: JSON.stringify(formData)
@@ -67,6 +74,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 messageDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i> ${result.message || 'Usuario creado exitosamente'}`;
                 form.reset();
                 fetchUsers();
+            } else if (response.status === 401) {
+                alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                localStorage.removeItem('authToken');
+                window.location.href = '../login.html';
             } else {
                 messageDiv.className = 'alert alert-danger';
                 messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> ${result.message || result.error || 'Error al crear usuario'}`;
@@ -86,14 +97,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para actualizar tabla de usuarios
     async function fetchUsers() {
         try {
-            const res = await fetch('http://localhost:8080/api/users', {
+            const res = await fetch(USERS_ENDPOINT, {
                 headers: authHeaders
             });
 
             if (!res.ok) {
                 if (res.status === 401) {
                     alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-                    window.location.href = '/login.html';
+                    localStorage.removeItem('authToken');
+                    window.location.href = '../login.html';
                     return;
                 }
                 throw new Error(`Error HTTP: ${res.status}`);
@@ -122,11 +134,27 @@ document.addEventListener('DOMContentLoaded', function () {
                         <td>${u.email || ''}</td>
                         <td>${u.userRole || ''}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary btnEdit">Editar</button>
-                            <button class="btn btn-sm btn-danger btnDelete">Eliminar</button>
+                            <button class="btn btn-sm btn-primary btnEdit" data-id="${u.id}">Editar</button>
+                            <button class="btn btn-sm btn-danger btnDelete" data-id="${u.id}">Eliminar</button>
                         </td>
                     </tr>`;
             });
+
+            // ✅ Agregar eventos a botones
+            document.querySelectorAll('.btnEdit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    alert(`Editar usuario ${userId} - Pendiente implementación`);
+                });
+            });
+
+            document.querySelectorAll('.btnDelete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    deleteConfirmation(userId);
+                });
+            });
+
         } catch (err) {
             console.error('Error cargando usuarios:', err);
             
@@ -134,12 +162,37 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tbody) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar los usuarios</td></tr>';
             }
-            
-            // Manejo de errores de autenticación
-            if (err.message && err.message.includes('401')) {
+        }
+    }
+
+    // ✅ Función para eliminar usuario
+    async function deleteConfirmation(userId) {
+        if (!confirm(`¿Estás seguro de eliminar el usuario #${userId}?`)) return;
+
+        try {
+            const response = await fetch(`${USERS_ENDPOINT}/${userId}`, {
+                method: 'DELETE',
+                headers: authHeaders
+            });
+
+            if (response.status === 401) {
                 alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-                window.location.href = '/login.html';
+                localStorage.removeItem('authToken');
+                window.location.href = '../login.html';
+                return;
             }
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('✅ Usuario eliminado correctamente');
+                fetchUsers();
+            } else {
+                alert(result.message || 'Error al eliminar usuario');
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            alert('❌ Error de conexión');
         }
     }
 

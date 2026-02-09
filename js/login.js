@@ -34,7 +34,7 @@ $(document).ready(function () {
         hideError();
 
         $.ajax({
-            url: 'http://localhost:8080/api/auth/login',
+            url: 'http://3.17.146.31:8080/api/auth/login',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ email, password }),
@@ -60,7 +60,7 @@ $(document).ready(function () {
         if(!email) return showRecoverMsg('Ingrese su email', 'danger');
 
         $.ajax({
-            url: 'http://localhost:8080/api/auth/recover',
+            url: 'http://3.17.146.31:8080api/auth/recover',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ email }),
